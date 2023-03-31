@@ -1,0 +1,72 @@
+.jEditor{
+
+}
+
+.jEditor:focus-visible{
+    outline: none;
+}
+
+.jEditor-element {
+    display: inline-block;
+    
+}
+.jEditor-element:focus-visible {
+    outline: none;
+    min-width: 1em;
+}
+
+.jEditor-structure {
+    display: inline-block;
+}
+
+.jEditor-structure .jEditor-element:focus-visible {
+    outline: solid #32a1ce;
+}
+
+.jEditor-func {
+    color: cadetblue;
+}
+.jEditor-brackets {
+    color: purple;
+}
+
+.jEditor-args {
+    color: coral;
+}
+
+.jEditor-identifier {
+    color:blue ;
+}
+.jEditor-operator {
+    color: blueviolet;
+}
+
+.jEditor-Suggestion {
+    position: absolute;
+    display: none;
+    left: 0;
+    top: 0;
+    border: 1px solid #32a1ce;
+}
+
+
+.jEditor-Suggestion[active] {
+    display: block;
+}
+
+.jEditor-Suggestion ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    width: 300px;
+}
+
+.jEditor-Suggestion-Item {
+    display: block;
+    font-size: 14px;
+    text-align: left;
+    color: #000;
+}
+.jEditor-Suggestion-Item[active] {
+    background-color: #eee;
+}

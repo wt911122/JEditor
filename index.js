@@ -1,0 +1,1 @@
+export { default as JEditorVuePlugin } from './src/vue-plugin/plugin.js';

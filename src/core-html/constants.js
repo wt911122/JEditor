@@ -1,0 +1,1 @@
+export const JEDITOR_MODEL_REF = '__JEDITOR_STRUCTURE__'
