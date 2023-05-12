@@ -1,0 +1,58 @@
+{
+	"concept": "BinaryExpression",
+	"operator": "+",
+	"left": {
+		"concept": "BinaryExpression",
+		"operator": "+",
+		"left": {
+			"concept": "Identifier",
+			"name": "x1"
+		},
+		"right": {
+			"concept": "CallFunction",
+			"name": "fnA",
+			"arguments": [
+				{
+					"concept": "Argument",
+					"name": "argu",
+					"expression": {
+						"concept": "Identifier",
+						"name": "x"
+					}
+				}
+			]
+		}
+	},
+	"right": {
+		"concept": "CallFunction",
+		"name": "sin",
+		"arguments": [
+			{
+				"concept": "Argument",
+				"name": "angle",
+				"expression": {
+					"concept": "BinaryExpression",
+					"operator": "+",
+					"left": {
+						"concept": "Identifier",
+						"name": "r"
+					},
+					"right": {
+						"concept": "CallFunction",
+						"name": "fnB",
+						"arguments": [
+							{
+								"concept": "Argument",
+								"name": "argu",
+								"expression": {
+									"concept": "Identifier",
+									"name": "n"
+								}
+							}
+						]
+					}
+				}
+			}
+		]
+	}
+}

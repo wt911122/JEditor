@@ -1,0 +1,16 @@
+.nasl-callfunction {
+    display: flex;
+    min-width: fit-content;
+    align-items: center;
+}
+
+.nasl-func-args-wrapper{
+    display: inline-flex;
+    min-width: fit-content;
+}
+
+.nasl-func-args {
+    display: flex;
+    align-items: center;
+}
+

@@ -1,0 +1,30 @@
+{
+	"concept": "BinaryExpression",
+	"operator": "+",
+	"left": {
+		"concept": "BinaryExpression",
+		"operator": "+",
+		"left": {
+			"concept": "Identifier",
+			"name": "x1"
+		},
+		"right": {
+			"concept": "Identifier",
+			"name": "爷爷泡的茶有一种味道叫做家陆羽泡的茶听说名和利都不拿爷爷泡的茶 有一种味道叫做家爷爷泡的茶 口感味觉好啊陆羽泡的茶 像幅泼墨的山水画"
+		}
+	},
+	"right": {
+		"concept": "CallFunction",
+		"name": "sin",
+		"arguments": [
+			{
+				"concept": "Argument",
+				"name": "angle",
+				"expression": {
+					"concept": "NumberLiteral",
+					"value": "20"
+				}
+			}
+		]
+	}
+}

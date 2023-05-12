@@ -1,0 +1,151 @@
+@font-face {
+    font-family: 'Monaco';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Monaco'), url('Monaco.woff') format('woff');
+}
+
+/* .jeditor-container {
+    position: relative;
+    display: block;
+    border: 2px solid yellowgreen;
+} */
+/* .jeditor-content {
+    display: block;
+    min-height: 500px;
+    cursor: text;
+} */
+.jeditor-hidden-input-wrapper {
+    overflow: hidden;
+    position: absolute;
+    width: 0px;
+    height: 0px;
+    top: 0px;
+    left: 0px;
+    display: block;
+    user-select: none;
+    opacity: 0;
+    z-index: -1;
+}
+.jeditor-hidden-input {
+    appearance: none;
+    overflow: hidden;
+    width: 200px;
+    height: 2em;
+    top: 0px;
+    left: 0px;
+    display: block;
+    position: absolute;
+}
+.jeditor-caret{
+    font-family: 'Monaco';
+    position: absolute;
+    color: green;
+    overflow: hidden;
+    width: 2px;
+    background-color: green;
+    pointer-events: none;
+    display: block;
+    top: 0px;
+    left: 0px;
+    z-index: 10;
+    /* animation: blink 1s infinite; */
+}
+
+.jeditor-range {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    z-index: -1;
+}
+.jeditor-selection {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    transform-origin: top left;
+    background: rgba(255, 0, 0, 0.37);
+}
+@keyframes blink {
+    0% {opacity: 0}
+    49%{opacity: 0}
+    50% {opacity: 1}
+}
+
+
+
+.jeditor-content .identifier {
+    color:blue ;
+}
+.jeditor-content  .operator {
+    color: blueviolet;
+}
+je-container {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+    box-sizing: border-box;
+}
+
+je-content {
+    display: flex;
+    min-width: fit-content;
+    font-family: 'Monaco';
+    font-weight: normal;
+    font-size: 14px;
+    cursor: text;
+}
+je-content pre {
+    display: inline-block;
+    margin: 0;
+    font-family: 'Monaco';
+    font-weight: normal;
+    font-size: 14px;
+    cursor: text;
+}
+je-content * {
+    user-select: none;
+}
+je-edit-area {
+    display: flex;
+    flex-direction: column;
+    min-width: fit-content;
+}
+je-edit-line {
+    min-width: fit-content;
+    /* min-height: 1.25em; */
+}
+je-edit-area je-edit-area {
+    display: inline-block;
+}
+je-edit-area je-edit-area.active {
+    outline: 1px solid #e2e2e2;
+}
+je-text-element {
+    /* white-space: pre-wrap; */
+    user-select: none;
+    min-height: 1.25em;
+    display: inline-block;
+    margin: 0;
+    font-family: 'Monaco';
+    font-weight: normal;
+    font-size: 14px;
+    cursor: text;
+}
+
+je-composite {
+    display: inline-flex;
+    min-width: fit-content;
+}
+je-composite.ensuredelete{
+    background-color: rgba(255, 0, 0, 0.37);
+}
+je-edit-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
