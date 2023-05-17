@@ -6,10 +6,12 @@ import ShadowInput from './infrastructure/shadow-input';
 import { resolveContextMeta } from './language/language-context';
 import { getFirstTextElementFromInstance } from './instance/utils';
 import EditorContext, { getTextWidth } from './editor-context';
-
+import Language from './language/language';
 import { 
     ArrowLeftCommand,
     ArrowRightCommand,
+    ArrowUpCommand,
+    ArrowDownCommand,
     ReturnCommand,
     DeleteCommand,
     UndoCommand,
@@ -18,11 +20,12 @@ import {
 import Input from './input/input';
 import Range from './infrastructure/range';
 import UndoRedo from './infrastructure/undoredo';
+import AutoCompletion from './infrastructure/autoCompletion';
 import { targetLockOn, findNextSibling } from './utils';
 
 class JEditor {
     constructor(configs = {}) {
-        this.lang = configs.language;
+        this.lang = new Language(configs.language);
         this.editorContext = new EditorContext();
         this.input = new Input();
         this.undoredo = new UndoRedo();
@@ -33,6 +36,8 @@ class JEditor {
 
         this.registCommand(ArrowLeftCommand);
         this.registCommand(ArrowRightCommand);
+        this.registCommand(ArrowUpCommand);
+        this.registCommand(ArrowDownCommand);
         this.registCommand(ReturnCommand);
         this.registCommand(DeleteCommand);
         this.registCommand(UndoCommand);
@@ -68,7 +73,9 @@ class JEditor {
         this.shadowInput = shadowInput;
         const range = Range.create(this);
         this.range = range;
-        containerElement.append(shadowInput.documentElement, contentElement, range.documentElement, caret.documentElement); 
+        const autocompletion = AutoCompletion.create(this);
+        this.autocompletion = autocompletion;
+        containerElement.append(shadowInput.documentElement, contentElement, range.documentElement, caret.documentElement, autocompletion.documentElement); 
         containerElement[JEDITOR_SYMBOL] = this;
         wrapper.append(containerElement);
         this.initializeContext();
@@ -88,6 +95,13 @@ class JEditor {
         this.editorContext.setMonoSpaceDouble(w2);
     }
 
+    requestCompletions() {
+        const { textElement, offset } = this.caret.status;
+        const token = textElement.getTokenBeforeOffset(offset);
+        const completions = this.lang.getAutoCompletions(token);
+        this.autocompletion.replaceItems(completions);
+    }
+
     initializeEventHandler() {
         // this.contentElement.addEventListener(JEDITOR_EVENTS.FOCUS, (e) => {
         //     const {
@@ -102,7 +116,8 @@ class JEditor {
         });
 
         this.shadowInput.addEventListener(JEDITOR_EVENTS.INPUT, e => {
-            this.input.handle(e.detail.kind, e.detail.data)
+            this.input.handle(e.detail.kind, e.detail.data);
+            this.requestCompletions();
         });
         let flag = false;
         this.contentElement.addEventListener('pointerdown', e => {

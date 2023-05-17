@@ -9,6 +9,7 @@ export const JEDITOR_CONTENT = 'je-content';
 export const JEDITOR_CONTAINER = 'je-container';
 export const JEDITOR_RANGE = 'je-range';
 export const JEDITOR_SELECTION = 'je-selection';
+export const JEDITOR_AUTO_COMPLETION = 'je-autocompletion';
 
 export const TOKEN = {
     IDENTIFIER: 'identifier',
@@ -52,4 +53,5 @@ export const OPERRATION = {
     ENSURE_DELETE: 'ensuredelete',
     SELECTION_DELETE: 'selectiondelete',
     SELECTION_INPUT: 'selectioninput',
+    COMPOSITE_INSERT: 'compositeinsert'
 }

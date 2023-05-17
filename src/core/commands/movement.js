@@ -211,3 +211,23 @@ export class ArrowRightCommand extends Command {
     }
 }
     
+
+export class ArrowUpCommand extends Command {
+    static name = KEYBOARD_COMMANDS.ARROW_UP;
+    exec() {
+        if(this._editor.autocompletion.isActive) {
+            this._editor.autocompletion.up();
+            return
+        }
+    }
+}
+
+export class ArrowDownCommand extends Command {
+    static name = KEYBOARD_COMMANDS.ARROW_DOWN;
+    exec() {
+        if(this._editor.autocompletion.isActive) {
+            this._editor.autocompletion.down();
+            return
+        }
+    }
+}

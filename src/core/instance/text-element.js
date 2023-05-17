@@ -1,7 +1,7 @@
 import { INSTANCE_TYPE, JEDITOR_EVENTS } from '../constants';
 import Base from "./base";
 import { createDocumentElement } from '../components/ctors';
-import { getEditor, tokenToHTML, calculateTextOffset } from '../utils';
+import { tokenToHTML } from '../utils';
 
 class TextElement extends Base {
     static create(editor, content) {
@@ -20,8 +20,7 @@ class TextElement extends Base {
 
     setSource(content) {
         const editor = this._editor;
-        const tokens = editor.lang.highlight(content);
-        console.log(tokens)
+        const tokens = editor.lang.tokenize(content);
         this.source = content;
         this.documentElement.innerHTML = tokenToHTML(tokens).join('');
     }
@@ -35,6 +34,12 @@ class TextElement extends Base {
             type: INSTANCE_TYPE.TEXT_ELEMENT,
             source: this.source
         }
+    }
+
+    getTokenBeforeOffset(offset) {
+        const content = this.source.substring(0, offset);
+        const tokens = this._editor.lang.tokenize(content);
+        return tokens.pop();
     }
 }
 

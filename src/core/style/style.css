@@ -123,7 +123,8 @@ je-edit-area je-edit-area {
     display: inline-block;
 }
 je-edit-area je-edit-area.active {
-    outline: 1px solid #e2e2e2;
+    outline: 2px solid rgba(0,0,0,0.5);
+    outline-offset: -2px;
 }
 je-text-element {
     /* white-space: pre-wrap; */
@@ -148,4 +149,31 @@ je-edit-line {
     display: flex;
     flex-direction: row;
     align-items: center;
+}
+
+je-autocompletion {
+    position: absolute;
+    display: none;
+    left: 0;
+    top: 0;
+    border: 1px solid #32a1ce;
+}
+je-autocompletion[active] {
+    display: block;
+}
+je-autocompletion ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    width: 300px;
+}
+
+je-autocompletion ul li{
+    display: block;
+    font-size: 14px;
+    text-align: left;
+    color: #000;
+}
+je-autocompletion ul li[active]{
+    background-color: #eee;
 }

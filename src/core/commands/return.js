@@ -5,7 +5,7 @@ import {
 import { KEYBOARD_COMMANDS, INSTANCE_TYPE } from "../constants";
 import EditLine from '../instance/edit-line';
 import TextElement from '../instance/text-element';
-import { ReturnInput } from '../infrastructure/undoredo';
+import { ReturnInput, CompositeInsert } from '../infrastructure/undoredo';
 
 
 export class ReturnCommand extends Command {
@@ -17,6 +17,24 @@ export class ReturnCommand extends Command {
             textElement,
             offset
         } = caret.status;
+
+        if(this._editor.autocompletion.isActive()) {
+            const completion = this._editor.autocompletion.select();
+            const composite = completion.put(this._editor);
+            const op = new CompositeInsert({
+                composite,
+                textElement,
+                offset,
+                token: this._editor.lang._lastToken,
+            });
+            undoredo.write(op);
+
+            op.redo(this._editor);
+            this._editor.autocompletion.replaceItems([]);
+
+            return
+        }
+        
         const op = new ReturnInput({
             textElement,
             offset,

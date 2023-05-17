@@ -94,6 +94,49 @@ export class SpaceInput extends PlainInput {
     type = OPERRATION.SPACEINPUT
 }
 
+export class CompositeInsert {
+    type = OPERRATION.COMPOSITE_INSERT;
+    path = null
+    offset = 0
+    composite = null;
+    token = '';
+    constructor(meta) {
+        this.path = getPathOfInstance(meta.textElement);
+        this.offset = meta.offset;
+        this.token = meta.token;
+        this.composite = meta.composite;
+    }
+    undo(editor) {
+        const editline = findParent(this.composite, INSTANCE_TYPE.LINE);
+        const composite_idx = editline.findIndex(this.composite);
+        const nextText = editline.getChild(composite_idx+1);
+        const preText = editline.getChild(composite_idx-1);
+        const tokenContent = this.token.content;
+        preText.setSource(preText.source + tokenContent + nextText.source);
+        editline.splice(composite_idx, 2);
+        editor.range.clear();
+        editor.caret.focus(preText, this.offset);
+    }
+    redo(editor) {
+        console.log(this.token)
+        // const tokenoffset = this.token.index;
+        const tokenLength = this.token.content.length;
+        const textElement = queryInstanceByPath(this.path, editor.editareaRoot);
+        const editline = findParent(textElement, INSTANCE_TYPE.LINE);
+        const text_idx = editline.findIndex(textElement);
+        const content = textElement.source;
+        const preContent = content.substring(0, this.offset - tokenLength);
+        const afterContent = content.substring(this.offset);
+        textElement.setSource(preContent);
+        const newTxt = TextElement.create(editor, afterContent);
+        editline.splice(text_idx + 1, 0, this.composite, newTxt);
+        const text = getFirstTextElementFromInstance(this.composite);
+        console.log(text)
+        editor.range.clear();
+        editor.caret.focus(text);
+    }
+}
+
 export class ReturnInput {
     type = OPERRATION.RETURNINPUT
     path = []
@@ -401,3 +444,5 @@ export class SelectionDelete extends DeleteInLine {
         super.redo(editor);
     }
 }
+
+

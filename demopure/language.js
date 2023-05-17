@@ -1,6 +1,7 @@
 import LanguageContext from '../src/core/language/language-context';
 import { makeElement } from '../src/core/components/dom';
-import { TOKEN } from '../src/core/constants';
+import { TOKEN, INSTANCE_TYPE } from '../src/core/constants';
+import { make } from './model';
 
 export const CallFunctionRender = (source) => {
     const editareaWrapper = (idx, editAreaDocumentElement) => {
@@ -70,22 +71,30 @@ function resolver(text) {
     return TOKEN.TEXT;
 }
 
+
+function translateCompletion(completion) {
+    const context = new LanguageContext();
+    completion.traverse(context);
+    context._contextRoot = context._currentTarget.elements[0];
+    return context;
+}
+export function translateRoot(astroot) {
+    const context = new LanguageContext();
+    astroot.traverse(context);
+    context.restore();
+    return context;
+}
+
 export const NaslLanguage = {
     components: {
         CallFunction: CallFunctionRender,
-    },
-    translate(astroot) {
-        const context = new LanguageContext();
-        astroot.traverse(context);
-        context.restore();
-        return context;
     },
 
     parse(content) {
 
     },
 
-    highlight(source) {
+    tokenize(source) {
         const tokens = [];
         for(;;) {
             const match = RE_TOKEN.exec(source);
@@ -100,6 +109,45 @@ export const NaslLanguage = {
             tokens.push(token);
         }
         return tokens;
+    },
+
+    staticAutoCompletions: {
+        "tan": {
+            prefix: 'tan',
+            body: translateCompletion(make({
+                concept: 'CallFunction',
+                name: 'tan',
+                arguments: [
+                    {
+                        concept: 'Argument',
+                        name: 'angle',
+                        expression: {
+                            concept: 'NumberLiteral',
+                            value: '',
+                        }
+                    }
+                ]
+            })),
+        },
+        "tangle": {
+            prefix: 'tangle',
+            body: translateCompletion(make({
+                concept: 'CallFunction',
+                name: 'tangle',
+                arguments: [
+                    {
+                        concept: 'Argument',
+                        name: 'param',
+                        expression: {
+                            concept: 'NumberLiteral',
+                            value: '',
+                        }
+                    }
+                ]
+            })),
+        }
     }
+
 }
+
 

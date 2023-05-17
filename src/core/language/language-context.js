@@ -8,10 +8,14 @@ class LanguageContext {
     _stack = [];
     _currentTarget = null;
 
+    _contextRoot = null;
+    _rootType = undefined;
+
     constructor() {
         const editArea = this.createEditAreaMeta();
         this._stack.push(editArea);
         this._currentTarget = editArea;
+        this._contextRoot = editArea;
     }
 
     addElement(element) {
@@ -160,7 +164,7 @@ export function loopMeta(root, parent, callback) {
 function createInstance(meta, editor) {
     switch(meta.type) {
         case INSTANCE_TYPE.COMPOSITE:
-            const component = editor.lang.components[meta.sourceType];
+            const component = editor.lang.components.get(meta.sourceType);
             if(component) {
                 const {
                     rootElement,
@@ -184,7 +188,7 @@ function createInstance(meta, editor) {
 }
 
 export function resolveContextMeta(context, editor) {
-    const rootMeta = context._currentTarget;
+    const rootMeta = context._contextRoot;
     const map = new WeakMap();
     loopMeta(rootMeta, null, (meta, parent) => {
         const instance = createInstance(meta, editor);
