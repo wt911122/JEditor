@@ -24,20 +24,27 @@ class Completion {
 
 class Language {
     components = new Map();
+    templates = new Map();
     tokenize = null;
+    codeParser = null;
     staticAutoCompletions = []
     _lastToken = null;
     constructor(lang) {
         const {
-            components,
+            feature,
             tokenize,
-            staticAutoCompletions
+            staticAutoCompletions,
+            codeParser,
         } = lang;
-
-        const keys = Object.keys(components);
+        this.codeParser = codeParser;
+        const keys = Object.keys(feature);
         keys.forEach(k => {
-            this.components.set(k, components[k]);
+            const feat = feature[k];
+            this.templates.set(k, feat.template);
+            this.components.set(k, feat.render);
         });
+        console.log(this.components);
+
         this.tokenize = tokenize;
 
         Object.keys(staticAutoCompletions).forEach(k => {

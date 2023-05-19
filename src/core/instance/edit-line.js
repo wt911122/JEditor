@@ -8,6 +8,9 @@ import Base, {
     _forEach,
 } from "./base";
 import { createDocumentElement } from '../components/ctors';
+import { getPathOfInstance } from '../utils';
+import TextElement from './text-element';
+import Composite from './composite';
 
 class EditLine extends Base {
     static create(editor) {
@@ -80,6 +83,17 @@ class EditLine extends Base {
             type: INSTANCE_TYPE.LINE,
             elemenst: this._elements.map(el => el.serialize())
         }
+    }
+
+    prepareParse(freeCode) {
+        this._elements.forEach(el => {
+            if(el instanceof TextElement) {
+                freeCode.appendCode(el.source, getPathOfInstance(el))
+            }
+            if(el instanceof Composite) {
+                freeCode.appendComposite(el, getPathOfInstance(el))
+            }
+        })
     }
 }
 

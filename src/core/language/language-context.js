@@ -128,6 +128,66 @@ export function loopMeta(root, parent, callback) {
         loopMeta(meta, root, callback);
     });
 }
+/*
+import { FreeCode, Structure } from './language-particle';
+class LanguageContext {
+    _stack = [];
+    _current = null;
+
+    _contextRoot = null;
+    _rootType = undefined;
+
+    static createCodeRoot() {
+        const context = new LanguageContext();
+        const code = new FreeCode();
+        context._stack.push(code);
+        context._currentTarget = code;
+        context._contextRoot = code;
+    }
+    static createStructureRoot() {
+        const context = new LanguageContext();
+        const struct = new Structure();
+        context._stack.push(struct);
+        context._currentTarget = struct;
+        context._contextRoot = struct;
+    }
+
+    createFreeCode() {
+        return new FreeCode();
+    }
+    createStructure(source) {
+        return new Structure(source);
+    }
+
+    appendCode(code) {
+        this._current.source += code;
+    }
+
+    setCurrentFreeCode(freecode) {
+        this._current = freecode;
+    }
+
+    getCurrentFreeCode() {
+        return this._current;
+    }
+
+    addElement(element) {
+
+    }
+
+    getCurrent() {
+
+    }
+
+    save() {
+
+    }
+
+    restore() {
+       
+    }
+
+}*/
 // function getChildren(node) {
 //     let list;
 //     switch(node.type){
@@ -165,13 +225,17 @@ function createInstance(meta, editor) {
     switch(meta.type) {
         case INSTANCE_TYPE.COMPOSITE:
             const component = editor.lang.components.get(meta.sourceType);
-            if(component) {
+            const template = editor.lang.templates.get(meta.sourceType);
+            console.log(component, meta.sourceType)
+            if(component && template) {
                 const {
                     rootElement,
                     compositeContainer,
                     editareaWrapper,
                 } = component(meta.source);
-                const instance = Composite.create(editor);
+                const parser = template(meta.source).parser
+                const instance = Composite.create(editor, meta.sourceType);
+                instance.setParser(parser)
                 instance.documentElement.append(rootElement);
                 instance.setCompositeContainer(compositeContainer);
                 instance.setEditAreaWrapper(editareaWrapper)

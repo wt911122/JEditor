@@ -1,6 +1,8 @@
 import { INSTANCE_TYPE } from '../constants';
 import Base, { _insert, _findIndex, _getChild, _getLastChild, _splice, _forEach } from "./base";
 import { createDocumentElement } from '../components/ctors';
+import { Structure, FreeCode } from '../language/language-particle';
+import TextElement from './text-element';
 
 class EditArea extends Base {
     static create(editor) {
@@ -65,6 +67,18 @@ class EditArea extends Base {
             type: INSTANCE_TYPE.EDIT_AREA,
             lines: this._lines.map(el => el.serialize())
         }
+    }
+
+    prepareParse() {
+        const freeCode = new FreeCode();
+        this._lines.forEach((line, idx) => {
+            if(idx > 0) {
+                freeCode.source += ' ';
+            }
+            line.prepareParse(freeCode)
+        })
+        freeCode.resolveStrucuture();
+        return freeCode;
     }
 }
 

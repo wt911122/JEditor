@@ -1,4 +1,4 @@
-import { JEDITOR_CONTENT, JEDITOR_CONTAINER, JEDITOR_SYMBOL, JEDITOR_EVENTS, INSTANCE_TYPE } from './constants';
+import { JEDITOR_CONTENT, JEDITOR_CONTAINER, JEDITOR_SYMBOL, JEDITOR_EVENTS, INSTANCE_TYPE, KEYBOARD_COMMANDS } from './constants';
 import { makeElement } from './components/dom';
 import Caret from './infrastructure/caret';
 import ShadowInput from './infrastructure/shadow-input';
@@ -32,6 +32,7 @@ class JEditor {
         this.input._editor = this;
         this.undoredo._editor = this;
         this.commands = new Map();
+        this.onChange = configs.onChange;
         
 
         this.registCommand(ArrowLeftCommand);
@@ -83,7 +84,7 @@ class JEditor {
 
         this.initializeEventHandler();
 
-       
+        this.parse();
     }
 
     initializeContext() {
@@ -102,6 +103,14 @@ class JEditor {
         this.autocompletion.replaceItems(completions);
     }
 
+    parse() {
+        const code = this.editareaRoot.prepareParse();
+        const result = code.parse(this.lang.codeParser);
+        if(result) {
+            this.onChange(result);
+        }
+    }
+
     initializeEventHandler() {
         // this.contentElement.addEventListener(JEDITOR_EVENTS.FOCUS, (e) => {
         //     const {
@@ -113,11 +122,15 @@ class JEditor {
             const kind = e.detail.kind;
             const cmd = this.commands.get(kind);
             cmd.exec();
+            if(kind === KEYBOARD_COMMANDS.DELTET) {
+                this.parse();
+            }
         });
 
         this.shadowInput.addEventListener(JEDITOR_EVENTS.INPUT, e => {
             this.input.handle(e.detail.kind, e.detail.data);
             this.requestCompletions();
+            this.parse();
         });
         let flag = false;
         this.contentElement.addEventListener('pointerdown', e => {

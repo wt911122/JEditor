@@ -11,7 +11,7 @@ class Base {
     }
 }
 
-class BinaryExpression extends Base {
+export class BinaryExpression extends Base {
     left = null
     right = null
     operator = ''
@@ -35,7 +35,7 @@ class BinaryExpression extends Base {
     }
 }
 
-class Identifier extends Base {
+export class Identifier extends Base {
     name = ''
     constructor(source) {
         super(source);
@@ -45,7 +45,7 @@ class Identifier extends Base {
         return this.name;
     }
 }
-class NumberLiteral extends Base {
+export class NumberLiteral extends Base {
     value = ''
     constructor(source) {
         super(source);
@@ -56,7 +56,7 @@ class NumberLiteral extends Base {
         return this.value;
     }
 }
-class CallFunction extends Base {
+export class CallFunction extends Base {
     name = ''
     arguments = []
     constructor(source) {
@@ -73,7 +73,8 @@ class CallFunction extends Base {
         context.restore();
     }
 }
-class Argument extends Base {
+
+export class Argument extends Base {
     name = ''
     expression = null
     constructor(source) {

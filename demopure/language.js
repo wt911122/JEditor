@@ -1,63 +1,10 @@
 import LanguageContext from '../src/core/language/language-context';
-import { makeElement } from '../src/core/components/dom';
 import { TOKEN, INSTANCE_TYPE } from '../src/core/constants';
 import { make } from './model';
-
-export const CallFunctionRender = (source) => {
-    const editareaWrapper = (idx, editAreaDocumentElement) => {
-        const target = source.arguments[idx];
-        console.log(target)
-        return makeElement({
-            tag: 'div',
-            className: ['nasl-func-args'],
-            childNodes: [
-                makeElement({
-                    tag: 'span',
-                    className: ['nasl-func-arguname'],
-                    textContent: target.name,
-                }),
-                makeElement({
-                    tag: 'span',
-                    className: ['nasl-colon'],
-                    textContent: ":",
-                }),
-                editAreaDocumentElement,
-            ]
-        })
-    }
-    const compositeContainer = makeElement({
-        tag: 'span',
-        className: ['nasl-func-args-wrapper'],
-    })
-    const rootElement = makeElement({
-        tag: 'div',
-        className: ['nasl-callfunction'],
-        childNodes: [
-            makeElement({
-                tag: 'span',
-                className: ['nasl-func-name'],
-                textContent: source.name,
-            }),
-            makeElement({
-                tag: 'span',
-                className: ['nasl-func-brackets'],
-                textContent: '(',
-            }),
-            compositeContainer,       
-            makeElement({
-                tag: 'span',
-                className: ['nasl-func-brackets'],
-                textContent: ')',
-            }),
-        ]
-    })
-    return {
-        rootElement,
-        compositeContainer,
-        editareaWrapper,
-    }
-
-}
+import parser from './nasl/parser';
+import {
+    CallFunction
+} from './lang-feature/index';
 
 const RE_TOKEN = /[0-9]+(\.[0-9]*)?([eE][\+\-]?[0-9]+)?|[A-Za-z_][A-Za-z_0-9]*|[+-/*]|\S|\s+/g;
 function resolver(text) {
@@ -86,12 +33,12 @@ export function translateRoot(astroot) {
 }
 
 export const NaslLanguage = {
-    components: {
-        CallFunction: CallFunctionRender,
+    feature: {
+        CallFunction
     },
 
-    parse(content) {
-
+    codeParser(source) {
+        return parser.parse(source)
     },
 
     tokenize(source) {
