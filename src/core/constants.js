@@ -10,6 +10,8 @@ export const JEDITOR_CONTAINER = 'je-container';
 export const JEDITOR_RANGE = 'je-range';
 export const JEDITOR_SELECTION = 'je-selection';
 export const JEDITOR_AUTO_COMPLETION = 'je-autocompletion';
+export const JEDITOR_ERROR_RANGE = 'je-error-decorator';
+
 
 export const TOKEN = {
     IDENTIFIER: 'identifier',

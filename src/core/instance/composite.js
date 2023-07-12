@@ -13,16 +13,23 @@ class Composite extends Base {
         instance._editor = editor;
         instance.sourceType = sourceType;
         instance.attach(elem);
-        this._compositeContainer = this.documentElement;
+        // this._compositeContainer = this.documentElement;
         return instance;
     }
     static TYPE = INSTANCE_TYPE.COMPOSITE;
     sourceType = undefined;
 
+    _areaMetaWeakMap = new WeakMap();
 
     _editareas = []
-    _compositeContainer = null;
+    // _compositeContainer = null;
     _editAreaWrapper = null;
+
+    /**
+     * insert
+     */
+    _component = null;
+    
 
     _parser = null;
 
@@ -30,23 +37,38 @@ class Composite extends Base {
         return this._editareas[idx];
     }
 
-    setCompositeContainer(container) {
-        this._compositeContainer = container;
-    }
+    // setCompositeContainer(container) {
+    //     this._compositeContainer = container;
+    // }
 
-    setEditAreaWrapper(wrapper) {
-        this._editAreaWrapper = wrapper;
+    // setEditAreaWrapper(wrapper) {
+    //     this._editAreaWrapper = wrapper;
+    // }
+
+    setComponent(component) {
+        this._component = component;
+        const comp = this._component.initialize();
+        this.documentElement.append(comp);
     }
 
     setParser(parser) {
         this._parser = parser
     }
 
-    insert(editarea, idx) {
-        _insert(
-            this._compositeContainer,
-            this._editareas,
-            idx, editarea, this._editAreaWrapper);
+    push(editarea, meta) {
+        const l = this._editareas.length;
+        this._editareas.splice(l, 0, editarea);
+        this._component.insertEditArea(editarea, l, meta);
+        this._areaMetaWeakMap.set(editarea, meta);
+    }
+
+    insert(editarea, idx, meta) {
+        this._editareas.splice(idx, 0, editarea);
+        this._component.insertEditArea(editarea, idx, meta)
+        // _insert(
+        //     this._compositeContainer,
+        //     this._editareas,
+        //     idx, editarea, this._editAreaWrapper);
     }
 
     getChildren() {
@@ -98,9 +120,12 @@ class Composite extends Base {
 
     prepareParse(idx) {
         const structure = new Structure(idx, this._parser);
-        this._editareas.forEach(erea => {
-            const freeCode = erea.prepareParse();
-            structure.appendFreeCode(freeCode)
+        const areaMetaWeakMap = this._areaMetaWeakMap;
+        console.log(areaMetaWeakMap)
+        this._editareas.forEach(area => {
+            const freeCode = area.prepareParse();
+            const meta = areaMetaWeakMap.get(area);
+            structure.appendFreeCode(meta, freeCode)
         });
         return structure;
     }

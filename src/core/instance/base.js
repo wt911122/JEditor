@@ -37,7 +37,7 @@ export function _insert(
     // target._parent = this;
     let _el = target.documentElement;
     if(wrapper) {
-        _el = wrapper(idx, _el);
+        _el = wrapper(target, _el, idx);
     }
     if(!nextElem) {
         instanceElement.append(_el);

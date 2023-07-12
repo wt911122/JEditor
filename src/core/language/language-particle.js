@@ -1,3 +1,4 @@
+import { queryInstanceByPath } from '../utils';
 import { astWalker } from './utils';
 
 /**
@@ -21,14 +22,21 @@ export class Structure {
         this.parser = parser;
     }
 
-    appendFreeCode(c) {
-        this.freeCodes.push(c)
+    appendFreeCode(meta, c) {
+        this.freeCodes.push({
+            meta,
+            code: c,
+        })
         c._parent = this;
     }
 
-    parse(codeparser) {
-        return this.parser((idx) => {
-            return this.freeCodes[idx].parse(codeparser)
+    parse(codeparser, editor) {
+        return this.parser((finder) => {
+            const code = finder(this.freeCodes)?.code;
+            if(code) {
+                return code.parse(codeparser, editor)
+            }
+            return null;
         })
     }
 }
@@ -79,25 +87,88 @@ export class FreeCode {
         });
     }
     
-    parse(codeparser) {
+    parse(codeparser, editor) {
         try {
-            const result = codeparser(this.source);
-            astWalker(result, (obj, currparent, currkey) => {
-                if(obj.type === "Composite") {
-                    const struct = this.structures[obj.id];
+            let result = codeparser(this.source);
+
+            const solveSegment = (segment) => {
+                if(segment.type === "Composite") {
+                    const struct = this.structures[segment.id];
                     if(struct) {
-                        currparent[currkey] = struct.parse(codeparser);
+                        return struct.parse(codeparser, editor);
                     }
-                } else if(typeof obj === 'object') {
-                    return true;
+                } else {
+                    astWalker(segment, (obj, currparent, currkey) => {
+                        if(obj.type === "Composite") {
+                            const struct = this.structures[obj.id];
+                            if(struct) {
+                                const t = struct.parse(codeparser, editor);
+                                if(currparent && currkey) {
+                                    currparent[currkey] = t;
+                                }
+                            }
+                        } else if(typeof obj === 'object') {
+                            return true;
+                        }
+                    });
+                    return segment;
                 }
-            });
+            }
+
+            if(result.type === "SegmentExpression") {
+                result = result.segments.map(s => solveSegment(s));
+            } else {
+                result = solveSegment(result)
+            }
+            
+            
             return result;
         } catch(err) {
             const { start, end } = err.location;
-            console.log(start, end)
             const r = [start.offset, end.offset];
-            console.log(r);
+            const source = this.sourceMap.filter(m => {
+                return m.start <= r[0] && m.end >= r[1];
+                // if(m.type === SOURCE_TYPE.TEXT) {
+                //     return {
+                //         type: 'text',
+                //         offset: m.start <= r[0] && m.end >= r[1],
+                //     }
+                // } else {
+                //     return {
+                //         type: 'structure',
+                //         path: m.path,
+                //     }
+                // }
+            });
+            console.log(source)
+            source.forEach(s => {
+                const type = s.type;
+                if(type === "TEXT") {
+                    editor.errorDecorator.addDecorator({
+                        type: s.type,
+                        offset: [
+                            r[0]-s.start,
+                            r[1]-s.start,
+                        ],
+                        path: s.path,
+                    })
+                }
+
+                if(type === "STRUCTURE") {
+                    editor.errorDecorator.addDecorator({
+                        type: s.type,
+                        path: s.path,
+                    })
+                }
+                // instance.decorate([
+                //     r[0]-s.start,
+                //     Math.min(instance.getLength(), r[1]-s.start)
+                // ])
+            });
+            
+
+            
+            return null;
         }
     }
 }

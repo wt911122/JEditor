@@ -83,6 +83,28 @@
 .jeditor-content  .operator {
     color: blueviolet;
 }
+.jeditor-content-wrapper {
+    display: block;
+    width: fit-content;
+    height: fit-content;
+    position: relative;
+}
+.jeditor-error-decorator{
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1; 
+}
+
+.jeditor-error-decorator > .je-er-dec {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1; 
+    height: 1.25em;
+    background: url(./error-underline.svg) repeat-x bottom left;
+}
+
 je-container {
     display: block;
     width: 100%;
@@ -126,9 +148,14 @@ je-edit-area je-edit-area.active {
     outline: 2px solid rgba(0,0,0,0.5);
     outline-offset: -2px;
 }
+je-edit-area je-edit-area:hover {
+    outline: 2px solid rgba(0,0,0,0.2);
+    outline-offset: -2px;
+}
 je-text-element {
     /* white-space: pre-wrap; */
     user-select: none;
+    min-width: 0.5em;
     min-height: 1.25em;
     display: inline-block;
     margin: 0;
@@ -136,6 +163,7 @@ je-text-element {
     font-weight: normal;
     font-size: 14px;
     cursor: text;
+    white-space: nowrap;
 }
 
 je-composite {
@@ -149,6 +177,9 @@ je-edit-line {
     display: flex;
     flex-direction: row;
     align-items: center;
+}
+je-edit-line + je-edit-line {
+    margin-top: .25em;
 }
 
 je-autocompletion {
@@ -177,3 +208,4 @@ je-autocompletion ul li{
 je-autocompletion ul li[active]{
     background-color: #eee;
 }
+

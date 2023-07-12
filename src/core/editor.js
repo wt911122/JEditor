@@ -21,6 +21,7 @@ import Input from './input/input';
 import Range from './infrastructure/range';
 import UndoRedo from './infrastructure/undoredo';
 import AutoCompletion from './infrastructure/autoCompletion';
+import { ErrorDecorator } from './infrastructure/decorators';
 import { targetLockOn, findNextSibling } from './utils';
 
 class JEditor {
@@ -59,6 +60,12 @@ class JEditor {
             },
             className: ['jeditor-container'],
         });
+
+        const contentWrapper = makeElement({
+            tag: 'div',
+            className: ['jeditor-content-wrapper'],
+        });
+
         const contentElement = makeElement({ 
             tag: JEDITOR_CONTENT,
             className: ['jeditor-content'],
@@ -67,7 +74,9 @@ class JEditor {
         this.containerElement = containerElement;
         const instance = resolveContextMeta(context, this);
         this.editareaRoot = instance;
+        
         contentElement.append(instance.documentElement);
+        
         const caret = Caret.create(this);
         this.caret = caret;
         const shadowInput = ShadowInput.create();
@@ -76,11 +85,15 @@ class JEditor {
         this.range = range;
         const autocompletion = AutoCompletion.create(this);
         this.autocompletion = autocompletion;
-        containerElement.append(shadowInput.documentElement, contentElement, range.documentElement, caret.documentElement, autocompletion.documentElement); 
+        const errorDecorator = ErrorDecorator.create(this);
+        this.errorDecorator = errorDecorator;
+
+        contentWrapper.append(errorDecorator.documentElement, contentElement)
+        containerElement.append(shadowInput.documentElement, contentWrapper, range.documentElement, caret.documentElement, autocompletion.documentElement); 
         containerElement[JEDITOR_SYMBOL] = this;
         wrapper.append(containerElement);
         this.initializeContext();
-        // caret.focus(getFirstTextElementFromInstance(instance));
+        caret.focus(getFirstTextElementFromInstance(instance));
 
         this.initializeEventHandler();
 
@@ -104,10 +117,13 @@ class JEditor {
     }
 
     parse() {
+        this.errorDecorator.clear()
         const code = this.editareaRoot.prepareParse();
-        const result = code.parse(this.lang.codeParser);
-        if(result) {
+        try{
+            const result = code.parse(this.lang.codeParser, this);
             this.onChange(result);
+        } catch(err) {
+            console.warn('语法错误')
         }
     }
 
@@ -122,8 +138,13 @@ class JEditor {
             const kind = e.detail.kind;
             const cmd = this.commands.get(kind);
             cmd.exec();
-            if(kind === KEYBOARD_COMMANDS.DELTET) {
-                this.parse();
+            switch(kind) {
+                case KEYBOARD_COMMANDS.RETURN:
+                case KEYBOARD_COMMANDS.DELTET:
+                case KEYBOARD_COMMANDS.UNDO:
+                case KEYBOARD_COMMANDS.REDO:
+                    this.parse();
+                break;
             }
         });
 

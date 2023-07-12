@@ -1,7 +1,8 @@
 import { 
     INSTANCE_TYPE,
     JEDITOR_CONTENT,
-    JEDITOR_CONTAINER
+    JEDITOR_CONTAINER,
+    JEDITOR_ERROR_RANGE
 } from '../constants';
 customElements.define(INSTANCE_TYPE.EDIT_AREA, class extends HTMLParagraphElement {}, { extends: 'p' })
 customElements.define(INSTANCE_TYPE.LINE, class extends HTMLParagraphElement {}, { extends: 'p' })
@@ -9,6 +10,8 @@ customElements.define(INSTANCE_TYPE.TEXT_ELEMENT, class extends HTMLPreElement {
 customElements.define(INSTANCE_TYPE.COMPOSITE, class extends HTMLDivElement {} , { extends: 'div'});
 customElements.define(JEDITOR_CONTAINER, class extends HTMLDivElement {} , { extends: 'div'})
 customElements.define(JEDITOR_CONTENT, class extends HTMLDivElement {} , { extends: 'div'})
+
+customElements.define(JEDITOR_ERROR_RANGE, class extends HTMLDivElement {} , { extends: 'div'})
 
 // customElements.define(INSTANCE_TYPE.EDIT_AREA, class extends HTMLElement {
 //     constructor() {

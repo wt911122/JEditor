@@ -25,6 +25,13 @@ class EditLine extends Base {
 
     _elements = [];
 
+    push(element, meta) {
+        _insert(
+            this.documentElement,
+            this._elements,
+            undefined, element);
+    }
+
     insert(element, idx) {
         _insert(
             this.documentElement,

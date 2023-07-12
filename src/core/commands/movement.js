@@ -3,9 +3,11 @@ import {
     findParent,
     queryChildren, 
     findElementWithRelativeCondition,
-    getBoundingBoxCenterY
+    getBoundingBoxCenterY,
+    calculateTextOffset,
+    calculateTextWidth
 } from "../utils";
-import { INSTANCE_TYPE, KEYBOARD_COMMANDS } from '../constants';
+import { INSTANCE_TYPE, KEYBOARD_COMMANDS, JEDITOR_SYMBOL } from '../constants';
 
 function findLastTextElementInLineElement(lineElement){
     if(lineElement.constructor.TYPE === INSTANCE_TYPE.TEXT_ELEMENT) {
@@ -69,17 +71,22 @@ export class ArrowLeftCommand extends Command {
 
         const composite = findParent(editarea, INSTANCE_TYPE.COMPOSITE);
         if(composite) {
-            const areas = composite.getChildren();
-            const currArea = editarea.documentElement.getBoundingClientRect();
-            const nextEditArea = findElementWithRelativeCondition({
-                targetElements: areas, 
-                factor: i => i.documentElement.getBoundingClientRect(),
-                condition:  (box, cur) => (box.right < currArea.left) && (currArea.left - box.right < cur.left - box.right),
-                filter: i => i !== editarea,
+            const areas = composite.getChildren().slice().sort((_a, _b) => {
+                const a = _a.documentElement.getBoundingClientRect();
+                const b = _b.documentElement.getBoundingClientRect();
+                if (a.top === b.top) {
+                  return a.left - b.left;
+                } else {
+                  return a.top - b.top;
+                }
             });
+            
+            const idx = areas.findIndex(ar => ar === editarea);
+            const nextEditArea = areas[idx-1];
             if(nextEditArea) {
+                const currArea = editarea.documentElement.getBoundingClientRect();
                 const lines = nextEditArea.getChildren();
-                const currAreaY = getBoundingBoxCenterY(currArea);
+                const currAreaY = getBoundingBoxCenterY(currArea); 
                 const line = findElementWithRelativeCondition({
                     targetElements: lines, 
                     factor: i => i.documentElement.getBoundingClientRect(),
@@ -170,15 +177,19 @@ export class ArrowRightCommand extends Command {
 
         const composite = findParent(editarea, INSTANCE_TYPE.COMPOSITE);
         if(composite) {
-            const areas = composite.getChildren();
-            const currArea = editarea.documentElement.getBoundingClientRect();
-            const nextEditArea = findElementWithRelativeCondition({
-                targetElements: areas, 
-                factor: i => i.documentElement.getBoundingClientRect(),
-                condition:  (box, cur) => (box.left > currArea.right) && (currArea.right - box.left < cur.right - box.left),
-                filter: i => i !== editarea,
+            const areas = composite.getChildren().slice().sort((_a, _b) => {
+                const a = _a.documentElement.getBoundingClientRect();
+                const b = _b.documentElement.getBoundingClientRect();
+                if (a.top === b.top) {
+                  return a.left - b.left;
+                } else {
+                  return a.top - b.top;
+                }
             });
+            const idx = areas.findIndex(ar => ar === editarea);
+            const nextEditArea = areas[idx+1];
             if(nextEditArea) {
+                const currArea = editarea.documentElement.getBoundingClientRect();
                 const lines = nextEditArea.getChildren();
                 const currAreaY = getBoundingBoxCenterY(currArea);
                 const line = findElementWithRelativeCondition({
@@ -219,6 +230,50 @@ export class ArrowUpCommand extends Command {
             this._editor.autocompletion.up();
             return
         }
+        const caret = this._editor.caret;
+        const {
+            textElement,
+            offset
+        } = caret.status;
+
+        const currBox = textElement.documentElement.getBoundingClientRect();
+        const currBoxY = getBoundingBoxCenterY(currBox);
+        const textElements = this._editor.contentElement.querySelectorAll(INSTANCE_TYPE.TEXT_ELEMENT);
+        let i = 0;
+        const l = textElements.length;
+        let min = Infinity;
+        let y, t, el;
+        while(i < l) {
+            const elem = textElements[i];
+            const box = elem.getBoundingClientRect();
+            y = getBoundingBoxCenterY(box);
+            if(y < currBoxY && (t = currBoxY - y) <= min) {
+                min = t;
+                el = elem;
+            }
+            i++;
+        }
+
+        if(el) {
+            const textElem = el[JEDITOR_SYMBOL];
+            const { monospace, monospacedouble } = this._editor.getEditorContext();
+            const textWidth = calculateTextWidth(textElem.source, 0, offset, monospace, monospacedouble); 
+            // const boxContent = this._editor.getContentBoundingClientRect();
+            // let tx = x - boxContent.x + textWidth;
+            const tx = currBox.left + textWidth;
+            const elemBox = el.getBoundingClientRect();
+            if(tx < elemBox.left) {
+                caret.focus(textElem, 0);
+                return;
+            }
+            if(tx > elemBox.right) {
+                caret.focus(textElem, textElem.getLength());
+                return;
+            }
+            const nextOffset = calculateTextOffset(textElem.source, tx - elemBox.left, monospace, monospacedouble)
+            caret.focus(textElem, nextOffset);
+            return;
+        }
     }
 }
 
@@ -226,8 +281,52 @@ export class ArrowDownCommand extends Command {
     static name = KEYBOARD_COMMANDS.ARROW_DOWN;
     exec() {
         if(this._editor.autocompletion.isActive) {
-            this._editor.autocompletion.down();
+            this._editor.autocompletion.up();
             return
+        }
+        const caret = this._editor.caret;
+        const {
+            textElement,
+            offset
+        } = caret.status;
+
+        const currBox = textElement.documentElement.getBoundingClientRect();
+        const currBoxY = getBoundingBoxCenterY(currBox);
+        const textElements = this._editor.contentElement.querySelectorAll(INSTANCE_TYPE.TEXT_ELEMENT);
+        let i = 0;
+        const l = textElements.length;
+        let min = Infinity;
+        let y, t, el;
+        while(i < l) {
+            const elem = textElements[i];
+            const box = elem.getBoundingClientRect();
+            y = getBoundingBoxCenterY(box);
+            if(y > currBoxY && (t = y - currBoxY) <= min) {
+                min = t;
+                el = elem;
+            }
+            i++;
+        }
+
+        if(el) {
+            const textElem = el[JEDITOR_SYMBOL];
+            const { monospace, monospacedouble } = this._editor.getEditorContext();
+            const textWidth = calculateTextWidth(textElem.source, 0, offset, monospace, monospacedouble); 
+            // const boxContent = this._editor.getContentBoundingClientRect();
+            // let tx = x - boxContent.x + textWidth;
+            const tx = currBox.left + textWidth;
+            const elemBox = el.getBoundingClientRect();
+            if(tx < elemBox.left) {
+                caret.focus(textElem, 0);
+                return;
+            }
+            if(tx > elemBox.right) {
+                caret.focus(textElem, textElem.getLength());
+                return;
+            }
+            const nextOffset = calculateTextOffset(textElem.source, tx - elemBox.left, monospace, monospacedouble)
+            caret.focus(textElem, nextOffset);
+            return;
         }
     }
 }

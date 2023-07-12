@@ -123,9 +123,7 @@ class Caret {
         const boxContainer = this._editor.getContainerInnerBoundingClientRect();
         let tx = x - boxContent.x + textWidth;
         let ty = y - boxContent.y;
-        console.log(y, boxContent.y, ty)
         const ox = boxContainer.x - boxContent.x;
-        console.log(tx-ox, boxContainer.width)
         if(tx - ox > boxContainer.width) {
             this._editor.scrollContent(tx - boxContainer.width + 2, 0);
         }

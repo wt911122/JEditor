@@ -18,6 +18,7 @@ class TextElement extends Base {
 
     source = ''
 
+
     setSource(content) {
         const editor = this._editor;
         const tokens = editor.lang.tokenize(content);

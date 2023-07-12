@@ -218,6 +218,9 @@ export function targetLockOn(targetElem, clientX, clientY, context, editor) {
                 break;
             }
         }
+        if(!elem) {
+            return null;
+        }
         const instance = elem[JEDITOR_SYMBOL];
         let i;
         DepthLastLoopMeta(instance, node => {

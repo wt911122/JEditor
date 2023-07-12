@@ -41,7 +41,7 @@ class Language {
         keys.forEach(k => {
             const feat = feature[k];
             this.templates.set(k, feat.template);
-            this.components.set(k, feat.render);
+            this.components.set(k, feat.component);
         });
         console.log(this.components);
 

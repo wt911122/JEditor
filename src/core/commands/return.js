@@ -18,7 +18,7 @@ export class ReturnCommand extends Command {
             offset
         } = caret.status;
 
-        if(this._editor.autocompletion.isActive()) {
+        if(this._editor.autocompletion.isActive) {
             const completion = this._editor.autocompletion.select();
             const composite = completion.put(this._editor);
             const op = new CompositeInsert({

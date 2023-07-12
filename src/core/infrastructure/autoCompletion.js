@@ -96,7 +96,7 @@ class AutoCompletion {
         this.active(n);
     }
 
-    isActive() {
+    get isActive() {
         return this._show;
     }
 

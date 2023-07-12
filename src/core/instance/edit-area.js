@@ -18,6 +18,13 @@ class EditArea extends Base {
 
     _lines = []
 
+    push(line, meta) {
+        _insert(
+            this.documentElement,
+            this._lines,
+            undefined, line);
+    }
+
     insert(line, idx) {
         _insert(
             this.documentElement,
@@ -73,7 +80,7 @@ class EditArea extends Base {
         const freeCode = new FreeCode();
         this._lines.forEach((line, idx) => {
             if(idx > 0) {
-                freeCode.source += ' ';
+                freeCode.source += ';';
             }
             line.prepareParse(freeCode)
         })
