@@ -1,42 +1,32 @@
 import JEditor from '../src/core/editor';
+import logicDesigner from './jflow-logic/index';
 import { NaslLanguage, translateRoot } from './language';
 import '../src/core/style/style.css';
 import './style.css';
-import source from './source2.json';
+import source from './source3.json';
 import { make } from './model';
-import LanguageContext, {resolveContextMeta} from '../src/core/language/language-context';
+// import LanguageContext, {resolveContextMeta} from '../src/core/language/language-context';
 const model = make(source);
 const meta = translateRoot(model);
 console.log(meta)
 console.log(model)
 
-// function translateCompletion(completion) {
-//     const context = new LanguageContext();
-//     completion.traverse(context);
-//     context._contextRoot = context._currentTarget.elements[0];
-//     return context;
-// }
-// const c = translateCompletion(make({
-//     concept: 'CallFunction',
-//     name: 'tangle',
-//     arguments: [
-//         {
-//             concept: 'Argument',
-//             name: 'param',
-//             expression: {
-//                 concept: 'NumberLiteral',
-//                 value: '',
-//             }
-//         }
-//     ]
-// }));
-
-const astwrapper = document.getElementById('ast');
+// const astwrapper = document.getElementById('ast');
+logicDesigner('#ast');
 const editorWrapper = document.getElementById('editor');
 const editor = new JEditor({
     language: NaslLanguage,
     onChange(ast) {
-        astwrapper.innerHTML = syntaxHighlight(ast);
+        console.log(ast)
+        window.reOrderAndReflow({
+            concept: 'Logic',
+            body: [
+                { concept: 'Start' },
+                ...ast,
+                { concept: 'End' },
+            ]
+        })
+        // astwrapper.innerHTML = syntaxHighlight(ast);
     }
 });
 editor.$mount(editorWrapper, meta);

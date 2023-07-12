@@ -1,11 +1,22 @@
 .nasl-callfunction {
-    display: flex;
-    min-width: fit-content;
+    display: inline-block;
     align-items: center;
+    border: 2px solid #E4E4E6;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+.nasl-callfunction h1 { 
+    font-size: 16px;
+    margin: 0;
+}
+.nasl-callfunction-name {
+    display: inline-block;
+   margin-left: .5em;
 }
 
 .nasl-func-args-wrapper{
-    display: inline-flex;
+    display: flex;
+    flex-direction: column;
     min-width: fit-content;
 }
 
@@ -13,4 +24,33 @@
     display: flex;
     align-items: center;
 }
+
+.nasl-assignment {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+    border: 2px solid #E4E4E6;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+.nasl-ifstatement,
+.nasl-while{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    border: 2px solid #E4E4E6;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+.nasl-if-test{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+.nasl-block{
+    margin-left: 20px;
+}
+
 

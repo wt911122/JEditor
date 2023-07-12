@@ -22,10 +22,22 @@
             };
         }, head);
     }
+    
+    function buildSegmentExpression( head, tail) {
+      const ast = {
+          type: 'SegmentExpression',
+          segments: [head],
+      } 
+
+      tail.forEach(function(element) {
+      	ast.segments.push(element[3]);
+      });
+      return ast;
+  }
 }
 
 Start
-  = __ e:LogicalORExpression __ { return e; }
+  = __ e:SegmentExpression __ { return e; }
 
 SourceCharacter
   = .
@@ -424,3 +436,12 @@ LogicalORExpression
 
 LogicalOROperator
   = "||"
+  
+SegmentExpression
+  = head: LogicalORExpression
+    tail:(__ SegmentOperator __ LogicalORExpression)*
+    { return buildSegmentExpression(head, tail); }
+    
+
+SegmentOperator
+  = ';'

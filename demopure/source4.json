@@ -1,0 +1,41 @@
+{
+    "concept": "IfStatement",
+    "test": {
+        "concept": "BinaryExpression",
+        "operator": "===",
+        "left": {
+            "concept": "Identifier",
+            "name": "x"
+        },
+        "right": {
+            "concept": "NumberLiteral",
+            "value": "2"
+        }
+    },
+    "consequent": [
+        {
+            "concept": "Assignment",
+            "left": {
+                "concept": "Identifier",
+                "name": "y"
+            },
+            "right": {
+                "concept": "NumberLiteral",
+                "value": "30"
+            }
+        }
+    ],
+    "alternate": [
+        {
+            "concept": "Assignment",
+            "left": {
+                "concept": "Identifier",
+                "name": "y"
+            },
+            "right": {
+                "concept": "NumberLiteral",
+                "value": "50"
+            }
+        }
+    ]
+}

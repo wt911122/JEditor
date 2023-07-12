@@ -420,6 +420,9 @@ module.exports = /*
         peg$c238 = peg$literalExpectation("&&", false),
         peg$c239 = "||",
         peg$c240 = peg$literalExpectation("||", false),
+        peg$c241 = function(head, tail) { return buildSegmentExpression(head, tail); },
+        peg$c242 = ";",
+        peg$c243 = peg$literalExpectation(";", false),
 
         peg$currPos          = 0,
         peg$savedPos         = 0,
@@ -563,7 +566,7 @@ module.exports = /*
       s0 = peg$currPos;
       s1 = peg$parse__();
       if (s1 !== peg$FAILED) {
-        s2 = peg$parseLogicalORExpression();
+        s2 = peg$parseSegmentExpression();
         if (s2 !== peg$FAILED) {
           s3 = peg$parse__();
           if (s3 !== peg$FAILED) {
@@ -4703,6 +4706,100 @@ module.exports = /*
       return s0;
     }
 
+    function peg$parseSegmentExpression() {
+      var s0, s1, s2, s3, s4, s5, s6, s7;
+
+      s0 = peg$currPos;
+      s1 = peg$parseLogicalORExpression();
+      if (s1 !== peg$FAILED) {
+        s2 = [];
+        s3 = peg$currPos;
+        s4 = peg$parse__();
+        if (s4 !== peg$FAILED) {
+          s5 = peg$parseSegmentOperator();
+          if (s5 !== peg$FAILED) {
+            s6 = peg$parse__();
+            if (s6 !== peg$FAILED) {
+              s7 = peg$parseLogicalORExpression();
+              if (s7 !== peg$FAILED) {
+                s4 = [s4, s5, s6, s7];
+                s3 = s4;
+              } else {
+                peg$currPos = s3;
+                s3 = peg$FAILED;
+              }
+            } else {
+              peg$currPos = s3;
+              s3 = peg$FAILED;
+            }
+          } else {
+            peg$currPos = s3;
+            s3 = peg$FAILED;
+          }
+        } else {
+          peg$currPos = s3;
+          s3 = peg$FAILED;
+        }
+        while (s3 !== peg$FAILED) {
+          s2.push(s3);
+          s3 = peg$currPos;
+          s4 = peg$parse__();
+          if (s4 !== peg$FAILED) {
+            s5 = peg$parseSegmentOperator();
+            if (s5 !== peg$FAILED) {
+              s6 = peg$parse__();
+              if (s6 !== peg$FAILED) {
+                s7 = peg$parseLogicalORExpression();
+                if (s7 !== peg$FAILED) {
+                  s4 = [s4, s5, s6, s7];
+                  s3 = s4;
+                } else {
+                  peg$currPos = s3;
+                  s3 = peg$FAILED;
+                }
+              } else {
+                peg$currPos = s3;
+                s3 = peg$FAILED;
+              }
+            } else {
+              peg$currPos = s3;
+              s3 = peg$FAILED;
+            }
+          } else {
+            peg$currPos = s3;
+            s3 = peg$FAILED;
+          }
+        }
+        if (s2 !== peg$FAILED) {
+          peg$savedPos = s0;
+          s1 = peg$c241(s1, s2);
+          s0 = s1;
+        } else {
+          peg$currPos = s0;
+          s0 = peg$FAILED;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$FAILED;
+      }
+
+      return s0;
+    }
+
+    function peg$parseSegmentOperator() {
+      var s0;
+
+      if (input.charCodeAt(peg$currPos) === 59) {
+        s0 = peg$c242;
+        peg$currPos++;
+      } else {
+        s0 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c243); }
+      }
+
+      return s0;
+    }
+
 
         function buildBinaryExpression(head, tail) {
             return tail.reduce(function(result, element) {
@@ -4727,6 +4824,18 @@ module.exports = /*
                 };
             }, head);
         }
+        
+        function buildSegmentExpression( head, tail) {
+          const ast = {
+              type: 'SegmentExpression',
+              segments: [head],
+          } 
+
+          tail.forEach(function(element) {
+          	ast.segments.push(element[3]);
+          });
+          return ast;
+      }
 
 
     peg$result = peg$startRuleFunction();

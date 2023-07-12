@@ -3,7 +3,10 @@ import { TOKEN, INSTANCE_TYPE } from '../src/core/constants';
 import { make } from './model';
 import parser from './nasl/parser';
 import {
-    CallFunction
+    CallFunction,
+    Assignment,
+    IfStatement,
+    WhileStatement
 } from './lang-feature/index';
 
 const RE_TOKEN = /[0-9]+(\.[0-9]*)?([eE][\+\-]?[0-9]+)?|[A-Za-z_][A-Za-z_0-9]*|[+-/*]|\S|\s+/g;
@@ -21,20 +24,36 @@ function resolver(text) {
 
 function translateCompletion(completion) {
     const context = new LanguageContext();
+    const editArea = context.createEditAreaMeta();
+    const editline = context.createEditLineMeta();
+    editArea.lines.push(editline);
+    context._stack.push(editArea);
+    context._stack.push(editline);
+    context._currentTarget = editline;
+    context._contextRoot = editArea;
+
     completion.traverse(context);
-    context._contextRoot = context._currentTarget.elements[0];
+    context._contextRoot = editline.elements[0];
     return context;
 }
 export function translateRoot(astroot) {
     const context = new LanguageContext();
+    const editArea = context.createEditAreaMeta();
+    context._stack.push(editArea);
+    context._currentTarget = editArea;
+    context._contextRoot = editArea;
     astroot.traverse(context);
+    context.restore();
     context.restore();
     return context;
 }
 
 export const NaslLanguage = {
     feature: {
-        CallFunction
+        CallFunction,
+        Assignment,
+        IfStatement,
+        WhileStatement
     },
 
     codeParser(source) {
@@ -91,6 +110,62 @@ export const NaslLanguage = {
                         }
                     }
                 ]
+            })),
+        },
+        "funcC": {
+            prefix: 'funcC',
+            body: translateCompletion(make({
+                concept: 'CallFunction',
+                name: 'funcC',
+                arguments: [
+                    {
+                        concept: 'Argument',
+                        name: 'p1',
+                        expression: {
+                            concept: 'NumberLiteral',
+                            value: '',
+                        }
+                    },
+                    {
+                        concept: 'Argument',
+                        name: 'p2',
+                        expression: {
+                            concept: 'NumberLiteral',
+                            value: '',
+                        }
+                    },
+                    {
+                        concept: 'Argument',
+                        name: 'p3',
+                        expression: {
+                            concept: 'NumberLiteral',
+                            value: '',
+                        }
+                    }
+                ]
+            }))
+        },
+        "if": {
+            prefix: 'if',
+            body: translateCompletion(make({
+                concept: 'IfStatement',
+                name: 'IfStatement',
+                consequent: [],
+                alternate: []
+            })),
+        },
+        "assignment": {
+            prefix: 'assignment',
+            body: translateCompletion(make({
+                concept: 'Assignment',
+            })),
+        },
+        "while": {
+            prefix: 'while',
+            body: translateCompletion(make({
+                concept: 'WhileStatement',
+                name: 'WhileStatement',
+                body: [],
             })),
         }
     }

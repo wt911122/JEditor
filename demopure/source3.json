@@ -1,0 +1,126 @@
+{
+    "concept": "Logic",
+    "body": [
+        {
+            "concept": "Assignment",
+            "left": {
+                "concept": "Identifier",
+                "name": "x"
+            },
+            "right": {
+                "concept": "NumberLiteral",
+                "value": "2"
+            }
+        },
+        {
+            "concept": "IfStatement",
+            "test": {
+                "concept": "LogicalExpression",
+                "operator": "&&",
+                "left": {
+                    "concept": "BinaryExpression",
+                    "operator": ">",
+                    "left": {
+                        "concept": "Identifier",
+                        "name": "x"
+                    },
+                    "right": {
+                        "concept": "NumberLiteral",
+                        "value": "2"
+                    }
+                },
+                "right": {
+                    "concept": "BinaryExpression",
+                    "operator": "<",
+                    "left": {
+                        "concept": "Identifier",
+                        "name": "x"
+                    },
+                    "right": {
+                        "concept": "NumberLiteral",
+                        "value": "8"
+                    }
+                }
+            },
+            "consequent": [
+                {
+                    "concept": "Assignment",
+                    "left": {
+                        "concept": "Identifier",
+                        "name": "y"
+                    },
+                    "right": {
+                        "concept": "CallFunction",
+						"name": "fnB",
+						"arguments": [
+							{
+								"concept": "Argument",
+								"name": "argu",
+								"expression": {
+									"concept": "Identifier",
+									"name": "n"
+								}
+							}
+						]
+                    }
+                },
+                {
+                    "concept": "CallFunction",
+                    "name": "fnB",
+                    "arguments": [
+                        {
+                            "concept": "Argument",
+                            "name": "argu",
+                            "expression": {
+                                "concept": "Identifier",
+                                "name": "n"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "alternate": [
+                {
+                    "concept": "Assignment",
+                    "left": {
+                        "concept": "Identifier",
+                        "name": "y"
+                    },
+                    "right": {
+                        "concept": "NumberLiteral",
+                        "value": "50"
+                    }
+                }
+            ]
+        },
+        {
+            "concept": "WhileStatement",
+            "test": {
+                "concept": "BinaryExpression",
+                "operator": "<=",
+                "left": {
+                    "concept": "Identifier",
+                    "name": "y"
+                },
+                "right": {
+                    "concept": "NumberLiteral",
+                    "value": "30"
+                }
+            },
+            "body": [
+                {
+                    "concept": "Assignment",
+                    "left": {
+                        "concept": "Identifier",
+                        "name": "y"
+                    },
+                    "right": {
+                        "concept": "NumberLiteral",
+                        "value": "30"
+                    }
+                }
+            ]
+        }
+    ]
+
+}
