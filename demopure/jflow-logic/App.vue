@@ -38,7 +38,7 @@
     </div>
 </template>
 <script>
-import { Lowcodelayout } from '@joskii/jflow';
+import Lowcodelayout from './layout/low-code-layout.js';
 import ifStatement from './components/ifstatement.vue';
 import start from './components/start.vue';
 import end from './components/end.vue';

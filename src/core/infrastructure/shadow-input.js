@@ -48,6 +48,7 @@ class ShadowInput extends EventTarget{
             case KEYBOARD_COMMANDS.ARROW_RIGHT:
             case KEYBOARD_COMMANDS.ARROW_UP:
             case KEYBOARD_COMMANDS.ARROW_DOWN:
+            case KEYBOARD_COMMANDS.TAB:
             case KEYBOARD_COMMANDS.RETURN:
             case KEYBOARD_COMMANDS.DELTET:
             case KEYBOARD_COMMANDS.UNDO:
@@ -139,6 +140,10 @@ class ShadowInput extends EventTarget{
                     break;
                 case "ArrowUp":
                     controlCallback(KEYBOARD_COMMANDS.ARROW_UP);
+                    break;
+                case 'Tab':
+                    event.preventDefault();
+                    controlCallback(KEYBOARD_COMMANDS.TAB);
                     break;
             }
             switch(event.key) {

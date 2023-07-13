@@ -8,6 +8,7 @@ import {
     calculateTextWidth
 } from "../utils";
 import { INSTANCE_TYPE, KEYBOARD_COMMANDS, JEDITOR_SYMBOL } from '../constants';
+import { getLastTextElementFromInstance, getFirstTextElementFromInstance } from "../instance/utils";
 
 function findLastTextElementInLineElement(lineElement){
     if(lineElement.constructor.TYPE === INSTANCE_TYPE.TEXT_ELEMENT) {
@@ -33,6 +34,7 @@ export class ArrowLeftCommand extends Command {
     static name = KEYBOARD_COMMANDS.ARROW_LEFT;
     
     exec() {
+        this._editor.range.clear();
         const caret = this._editor.caret;
         const {
             textElement,
@@ -140,6 +142,7 @@ export class ArrowRightCommand extends Command {
     static name = KEYBOARD_COMMANDS.ARROW_RIGHT;
     exec() {
         const caret = this._editor.caret;
+        this._editor.range.clear();
         const {
             textElement,
             offset
@@ -230,6 +233,7 @@ export class ArrowUpCommand extends Command {
             this._editor.autocompletion.up();
             return
         }
+        this._editor.range.clear();
         const caret = this._editor.caret;
         const {
             textElement,
@@ -285,6 +289,7 @@ export class ArrowDownCommand extends Command {
             return
         }
         const caret = this._editor.caret;
+        this._editor.range.clear();
         const {
             textElement,
             offset
@@ -335,11 +340,16 @@ export class TabCommand extends Command {
     static name = KEYBOARD_COMMANDS.TAB;
     
     exec() {
+        debugger
+        const editor = this._editor;
+        const caret = this._editor.caret;
+        const range = this._editor.range;
         const {
             textElement,
         } = caret.status;
         const composite = findParent(textElement, INSTANCE_TYPE.COMPOSITE);
         if(composite) {
+            const editarea = findParent(textElement, INSTANCE_TYPE.EDIT_AREA);
             const areas = composite.getChildren().slice().sort((_a, _b) => {
                 const a = _a.documentElement.getBoundingClientRect();
                 const b = _b.documentElement.getBoundingClientRect();
@@ -350,9 +360,22 @@ export class TabCommand extends Command {
                 }
             });
             const idx = areas.findIndex(ar => ar === editarea);
-            const nextEditArea = areas[idx+1];
+            const l = areas.length
+            const nextEditArea = areas[(idx+1)%l];
             if(nextEditArea) {
-                
+                const a = getFirstTextElementFromInstance(nextEditArea);
+                const b = getLastTextElementFromInstance(nextEditArea);
+                range.clear();
+                range.setInitialBoundary({
+                    textElement: a,
+                    offset: 0
+                });
+                range.setCurrentBoundary({
+                    textElement: b,
+                    offset: b.getLength()
+                });
+                editor.resolveRange();
+                editor.caret.focus(b, b.getLength());
             }
         }
     }

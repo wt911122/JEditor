@@ -18,6 +18,7 @@ import {
     RedoCommand,
     CopyCommand,
     PasteCommand,
+    TabCommand,
 } from './commands/index'
 import Input from './input/input';
 import Range from './infrastructure/range';
@@ -48,6 +49,7 @@ class JEditor {
         this.registCommand(RedoCommand);
         this.registCommand(CopyCommand);
         this.registCommand(PasteCommand);
+        this.registCommand(TabCommand);
     }
 
     registCommand(cmd) {
@@ -142,11 +144,13 @@ class JEditor {
             const kind = e.detail.kind;
             const cmd = this.commands.get(kind);
             cmd.exec();
+            this.autocompletion.replaceItems([]);
             switch(kind) {
                 case KEYBOARD_COMMANDS.RETURN:
                 case KEYBOARD_COMMANDS.DELTET:
                 case KEYBOARD_COMMANDS.UNDO:
                 case KEYBOARD_COMMANDS.REDO:
+                case KEYBOARD_COMMANDS.PASTE:
                     this.parse();
                 break;
             }
@@ -182,8 +186,8 @@ class JEditor {
             }, {
                 once: true,
             }) */
-
             
+            this.autocompletion.replaceItems([]);
             const boundary = targetLockOn(e.target, e.clientX, e.clientY, this.editorContext, this);
             this.range.clear();
             this.range.setInitialBoundary(boundary);

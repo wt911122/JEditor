@@ -55,7 +55,7 @@
 						"arguments": [
 							{
 								"concept": "Argument",
-								"name": "argu",
+								"name": "arg",
 								"expression": {
 									"concept": "Identifier",
 									"name": "n"
@@ -70,7 +70,7 @@
                     "arguments": [
                         {
                             "concept": "Argument",
-                            "name": "argu",
+                            "name": "arg",
                             "expression": {
                                 "concept": "Identifier",
                                 "name": "n"
