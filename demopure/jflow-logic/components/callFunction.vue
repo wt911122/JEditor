@@ -66,7 +66,6 @@ export default {
         node: Object,
     },
     data() {
-        console.log(this.node)
         return {
             rootConfig: {
                 indicatorColor: '#F56CC7',

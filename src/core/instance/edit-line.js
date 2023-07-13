@@ -96,10 +96,16 @@ class EditLine extends Base {
     }
 
     serialize() {
-        return {
-            type: INSTANCE_TYPE.LINE,
-            elemenst: this._elements.map(el => el.serialize())
+        const factory = () => {
+            const editline = EditLine.create(this._editor);
+            this._elements.forEach(element => {
+                const elementFac = element.serialize();
+                const newElement = elementFac();
+                editline.push(newElement)
+            })
+            return editline;
         }
+        return factory
     }
 
     prepareParse(freeCode) {

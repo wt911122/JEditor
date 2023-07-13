@@ -33,14 +33,24 @@ export default class Input {
     }
 */
     handle(kind, data){
-        const caret = this._editor.caret;
+        const editor = this._editor;
+        const caret = editor.caret;
+        const range = editor.range;
+        const batch = new BatchAction();
+        batch.recordBeforeCaret(caret);
+        const selections = range.getSelections();
+        if(selections.length > 0) {
+            const [element, offset] = range._delete(batch);
+            caret.focus(element, offset);
+            range.clear();
+        }
+
         const {
             textElement,
             offset
         } = caret.status;
         const content = textElement.source;
-        const batch = new BatchAction();
-        batch.recordBeforeCaret(caret);
+
         let preContent = content.substring(0, offset);
         let afterContent 
         if(this.composite_cache) {
@@ -76,6 +86,6 @@ export default class Input {
         }
         batch.recordAfterCaret(caret);
 
-        this._editor.undoredo.write(batch);
+        editor.undoredo.write(batch);
     }
 }

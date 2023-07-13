@@ -287,7 +287,7 @@ export function resolveContextMeta(context, editor) {
             const parser = template(meta.source).parser
             instance = Composite.create(editor, meta.sourceType);
             instance.setParser(parser);
-            instance.setComponent(component(meta.source));
+            instance.setComponent(() => component(meta.source));
         } else {
             switch(meta.type) {
                 case INSTANCE_TYPE.EDIT_AREA:
@@ -307,7 +307,15 @@ export function resolveContextMeta(context, editor) {
             return;
         }
         const parentInstance = map.get(parent);
-        parentInstance.push(instance, meta);
+        if(instance instanceof EditArea) {
+            parentInstance.push(instance, {
+                type: meta.type,
+                sourceType: meta.sourceType,
+                addtional: meta.addtional,
+            });
+        } else {
+            parentInstance.push(instance)
+        }
     });
     return map.get(rootMeta);
 }

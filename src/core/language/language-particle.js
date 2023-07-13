@@ -86,6 +86,8 @@ export class FreeCode {
             this.structures.push(structure);
         });
     }
+
+
     
     parse(codeparser, editor) {
         try {
@@ -170,7 +172,6 @@ export class FreeCode {
                 // ])
             });
             editor.errorDecorator.resolve();
-            debugger
             throw 'resolved';
         }
     }

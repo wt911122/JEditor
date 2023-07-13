@@ -16,6 +16,8 @@ import {
     DeleteCommand,
     UndoCommand,
     RedoCommand,
+    CopyCommand,
+    PasteCommand,
 } from './commands/index'
 import Input from './input/input';
 import Range from './infrastructure/range';
@@ -44,6 +46,8 @@ class JEditor {
         this.registCommand(DeleteCommand);
         this.registCommand(UndoCommand);
         this.registCommand(RedoCommand);
+        this.registCommand(CopyCommand);
+        this.registCommand(PasteCommand);
     }
 
     registCommand(cmd) {

@@ -43,6 +43,13 @@ class TextElement extends Base {
             source: this.source
         }
     }
+    serialize() {
+        const factory = () => {
+            const textelement = TextElement.create(this._editor, this.source);
+            return textelement;
+        }
+        return factory
+    }
 
     getTokenBeforeOffset(offset) {
         const content = this.source.substring(0, offset);

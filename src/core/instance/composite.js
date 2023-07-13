@@ -45,8 +45,9 @@ class Composite extends Base {
     //     this._editAreaWrapper = wrapper;
     // }
 
-    setComponent(component) {
-        this._component = component;
+    setComponent(componentFactory) {
+        this._componentFactory = componentFactory;
+        this._component = componentFactory();
         const comp = this._component.initialize();
         this.documentElement.append(comp);
     }
@@ -112,10 +113,21 @@ class Composite extends Base {
     }
 
     serialize() {
-        return {
-            type: INSTANCE_TYPE.COMPOSITE,
-            instance: this,
+        const factory = () => {
+            const composite = Composite.create(this._editor, this.sourceType);
+            composite.setComponent(this._componentFactory);
+            composite.setParser(this._parser);
+            const areaMetaWeakMap = this._areaMetaWeakMap;
+            this._editareas.forEach(area => {
+                const editareaFac = area.serialize();
+                const editarea = editareaFac();
+                const meta = areaMetaWeakMap.get(area);
+                composite.push(editarea, meta)
+            });
+            return composite;
         }
+        
+        return factory
     }
 
     prepareParse(idx) {

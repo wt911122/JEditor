@@ -44,6 +44,8 @@ export const KEYBOARD_COMMANDS = {
     UNDO: 'undo',
     REDO: 'redo',
     TAB: 'tab',
+    COPY: 'copy',
+    PASTE: 'paste'
 }
 
 export const OPERRATION = {

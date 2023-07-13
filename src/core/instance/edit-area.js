@@ -79,10 +79,16 @@ class EditArea extends Base {
     }
 
     serialize() {
-        return {
-            type: INSTANCE_TYPE.EDIT_AREA,
-            lines: this._lines.map(el => el.serialize())
+        const factory = () => {
+            const editarea = EditArea.create(this._editor);
+            this._lines.forEach(line => {
+                const lineFac = line.serialize();
+                const newLine = lineFac();
+                editarea.push(newLine)
+            })
+            return editarea;
         }
+        return factory
     }
 
     prepareParse() {

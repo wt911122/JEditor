@@ -532,6 +532,7 @@ export class BatchAction {
     }
 
     undo(editor) {
+        editor.range.clear();
         this._batch.slice().reverse().forEach(action => {
             switch(action.op) {
                 case 'range':
@@ -571,6 +572,7 @@ export class BatchAction {
     }
 
     redo(editor) {
+        editor.range.clear();
         this._batch.forEach(action => {
             switch(action.op) {
                 case 'setSource':

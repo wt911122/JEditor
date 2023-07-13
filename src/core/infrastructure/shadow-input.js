@@ -52,6 +52,8 @@ class ShadowInput extends EventTarget{
             case KEYBOARD_COMMANDS.DELTET:
             case KEYBOARD_COMMANDS.UNDO:
             case KEYBOARD_COMMANDS.REDO:
+            case KEYBOARD_COMMANDS.COPY:
+            case KEYBOARD_COMMANDS.PASTE:
                 this.dispatchEvent(new CustomEvent(JEDITOR_EVENTS.CONTROL_CMD, {
                     detail: {
                         kind,
@@ -152,17 +154,7 @@ class ShadowInput extends EventTarget{
                     if(status.ctrlOn) {
                         controlCallback('CtrlA');
                     }
-                    break;
-                case 'c':
-                    if(status.ctrlOn) {
-                        controlCallback('CtrlC');
-                    }
                     break; 
-                case 'v':
-                    if(status.ctrlOn) {
-                        controlCallback('CtrlV');
-                    }
-                    break;   
                 case 'x':
                     if(status.ctrlOn) {
                         controlCallback('CtrlX');
@@ -182,6 +174,15 @@ class ShadowInput extends EventTarget{
                     }
                     break;
             }
+        })
+
+        input.addEventListener('copy', (event) => {
+            event.preventDefault();
+            controlCallback(KEYBOARD_COMMANDS.COPY);
+        })
+        input.addEventListener('paste', (event) => {
+            event.preventDefault();
+            controlCallback(KEYBOARD_COMMANDS.PASTE);
         })
     }
     setPosition(x, y) {
