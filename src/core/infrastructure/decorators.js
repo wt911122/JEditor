@@ -21,7 +21,7 @@ export class ErrorDecorator {
     }
 
     clear() {
-        // this.documentElement.innerHTML = '';
+        this.documentElement.innerHTML = '';
         this._decorators = [];
     }
 
@@ -47,8 +47,8 @@ export class ErrorDecorator {
                 const point = [rect.x - origin.x + begin, rect.y - origin.y];
                 console.log(point);
                 decorates.push({
-                    // point,
-                    // width,
+                    point,
+                    width,
                     style: `height: 1.25em;width: ${width}px; transform: translate(${point[0]}px, ${point[1]}px)`,
                 })
             }
@@ -59,8 +59,8 @@ export class ErrorDecorator {
                 const point = [rect.x - origin.x, rect.bottom - origin.y];
                 console.log(point);
                 decorates.push({
-                    // point,
-                    // width: rect.width,
+                    point,
+                    width: rect.width,
                     style: `height: 2px;width: ${rect.width}px; transform: translate(${point[0]}px, ${point[1]}px)`,
                 })
             }

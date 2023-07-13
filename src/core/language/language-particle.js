@@ -89,6 +89,7 @@ export class FreeCode {
     
     parse(codeparser, editor) {
         try {
+            console.log('parse: ', this.source)
             let result = codeparser(this.source);
 
             const solveSegment = (segment) => {
@@ -124,6 +125,9 @@ export class FreeCode {
             
             return result;
         } catch(err) {
+            if(err === 'resolved') {
+                return;
+            }
             const { start, end } = err.location;
             const r = [start.offset, end.offset];
             const source = this.sourceMap.filter(m => {
@@ -140,7 +144,7 @@ export class FreeCode {
                 //     }
                 // }
             });
-            console.log(source)
+            console.log(source, err);
             source.forEach(s => {
                 const type = s.type;
                 if(type === "TEXT") {
@@ -165,10 +169,9 @@ export class FreeCode {
                 //     Math.min(instance.getLength(), r[1]-s.start)
                 // ])
             });
-            
-
-            
-            return null;
+            editor.errorDecorator.resolve();
+            debugger
+            throw 'resolved';
         }
     }
 }

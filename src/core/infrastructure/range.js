@@ -1,4 +1,4 @@
-import { getAncestors, findParent, calculateTextSelectionInRange, findPreviousSibling, findNextSibling } from '../utils'
+import { getAncestors, findParent, calculateTextSelectionInRange, findPreviousSibling, findNextSibling, queryInstanceByPath, getPathOfInstance } from '../utils'
 import { makeElement } from '../components/dom'; 
 import { INSTANCE_TYPE, JEDITOR_RANGE, JEDITOR_SELECTION } from '../constants'
 import EditLine from '../instance/edit-line';
@@ -201,37 +201,81 @@ class Range {
                     currentOffset: initOffset,
                 }, coparent, selections)
             }
+            
+            // if(selections[0].type === 'je-composite') {
+
+            //     const idx = coparent.findIndex(selections[0].scope)
+            //     const txt = coparent.getChild(idx-1);
+            //     selections.unshift(getSelectionSnippet(txt, txt.getLength()));
+            // } 
+            // if(selections[selections.length-1].type === 'je-composite') {
+            //     const idx = coparent.findIndex(selections[selections.length-1].scope)
+            //     const txt = coparent.getChild(idx+1);
+            //     selections.unshift(getSelectionSnippet(txt, 0, false));
+            // }
+            console.log(selections);
             return selections;
         }
         return [];
     }
 
-    _delete(isRedo) {
+    _saveBoundary() {
+        return [
+            {
+                path: getPathOfInstance(this.initialBoundary.textElement),
+                offset: this.initialBoundary.offset,
+            },
+            {
+                path: getPathOfInstance(this.currentBoundary.textElement),
+                offset: this.currentBoundary.offset,
+            },
+        ]
+    }
+
+    restoreBoundary(store) {
+        const editareaRoot = this._editor.editareaRoot
+        const [a, b] = store;
+        this.initialBoundary = {
+            textElement: queryInstanceByPath(a.path, editareaRoot),
+            offset: a.offset,
+        }
+        this.currentBoundary = {
+            textElement: queryInstanceByPath(b.path, editareaRoot),
+            offset: b.offset,
+        }
+    }
+
+    _delete(batch) {
         const selections = this._selections;     
         const a = selections[0];
         const b = selections[selections.length-1];
         const textA = a.scope;
         const textB = b.scope;
         const [i, j] = a.offset;
-        
-        const editline = findParent(textA, INSTANCE_TYPE.LINE);
-        if(!isRedo) {
-            const undoredo = this._editor.undoredo;
-            const s = new SelectionDelete({
-                selections,
-                editline, 
-                textElement: textA,
-                offset: i,
 
-                endTextElement: textB,
-                endOffset: b.offset[1],
-            }); 
-            undoredo.write(s)
-            s.setToPosition(textA, i);
-        }
+        batch.push({
+            op: 'range',
+            args: this._saveBoundary(),
+        });
+
+        // const editline = findParent(textA, INSTANCE_TYPE.LINE);
+        // if(!isRedo) {
+        //     const undoredo = this._editor.undoredo;
+        //     const s = new SelectionDelete({
+        //         selections,
+        //         editline, 
+        //         textElement: textA,
+        //         offset: i,
+
+        //         endTextElement: textB,
+        //         endOffset: b.offset[1],
+        //     }); 
+        //     undoredo.write(s)
+        //     s.setToPosition(textA, i);
+        // }
 
         if(selections.length === 1) {
-            textA.setSource(textA.source.substring(0, i) + a.scope.source.substring(j)); 
+            textA.setSource(textA.source.substring(0, i) + a.scope.source.substring(j), batch); 
             return [textA, i];
         }
 
@@ -244,20 +288,22 @@ class Range {
         const _b = textB.source.substring(b.offset[1]);
 
         if(line_a === line_b) {
-            textA.setSource(_a + _b);
-            line_a.splice(a_idx+1, b_idx-a_idx);
+            textA.setSource(_a + _b, batch);
+            line_a.splice(batch, a_idx+1, b_idx-a_idx);
             return [textA, i];
         }
 
         const edirarea = findParent(textA, INSTANCE_TYPE.EDIT_AREA);
         const line_a_idx = edirarea.findIndex(line_a);
         const line_b_idx = edirarea.findIndex(line_b);
-        const remain_a = line_a.slice(0, a_idx + 1);
+        const alength = line_a.getLength();
+        // const remain_a = line_a.slice(0, a_idx + 1);
         const remain_b = line_b.slice(b_idx + 1);
-        textA.setSource(_a + _b);
-        const newline = EditLine.create(this._editor);
-        newline.splice(0, 0, ...remain_a, ...remain_b)
-        edirarea.splice(line_a_idx, line_b_idx - line_a_idx + 1, newline);
+        textA.setSource(_a + _b, batch);
+        // const newline = EditLine.create(this._editor);
+        // newline.splice(batch, 0, 0, ...remain_a, ...remain_b)
+        line_a.splice(batch, a_idx + 1, alength - a_idx, ...remain_b)
+        edirarea.splice(batch, line_a_idx+1, line_b_idx - line_a_idx);
 
         return [textA, i];
     }
@@ -304,26 +350,38 @@ function getSelectionsInEditArea({
   }, {
     _b, _b_idx, lb, curr_coparent_idx, currentOffset
   }, coparent, selections ) {
-      const l1_init_ins = _a[_a_idx + 1];
-      selections.push(getSelectionSnippet(l1_init_ins, initOffset, true));
-      const l1_init_ins_idx = la.findIndex(l1_init_ins) + 1;
-      la.forEach((c) => {
-          selections.push(getSelectionSnippet(c));
-      }, l1_init_ins_idx)
+    const l1_init_ins = _a[_a_idx + 1];
+    if(l1_init_ins.constructor.TYPE === INSTANCE_TYPE.COMPOSITE) {
+        const line = _a[_a_idx];
+        const idx = line.findIndex(l1_init_ins);
+        const pretxt = line.getChild(idx - 1);
+        selections.push(getSelectionSnippet(pretxt, pretxt.getLength()))
+    }
+    selections.push(getSelectionSnippet(l1_init_ins, initOffset, true));
+    const l1_init_ins_idx = la.findIndex(l1_init_ins) + 1;
+    la.forEach((c) => {
+        selections.push(getSelectionSnippet(c));
+    }, l1_init_ins_idx)
 
-      coparent.forEach((line) => {
-          line.forEach((l => {
-              selections.push(getSelectionSnippet(l));
-          }));
-      }, init_coparent_idx + 1, curr_coparent_idx-1);
+    coparent.forEach((line) => {
+        line.forEach((l => {
+            selections.push(getSelectionSnippet(l));
+        }));
+    }, init_coparent_idx + 1, curr_coparent_idx-1);
 
-      const l2_curr_ins = _b[_b_idx + 1];
-      const l2_curr_ins_idx = lb.findIndex(l2_curr_ins) - 1;
-      lb.forEach((c) => {
-          selections.push(getSelectionSnippet(c));
-      }, 0, l2_curr_ins_idx);
-      selections.push(getSelectionSnippet(l2_curr_ins, currentOffset, false));
-  }
+    const l2_curr_ins = _b[_b_idx + 1];
+    const l2_curr_ins_idx = lb.findIndex(l2_curr_ins) - 1;
+    lb.forEach((c) => {
+        selections.push(getSelectionSnippet(c));
+    }, 0, l2_curr_ins_idx);
+    selections.push(getSelectionSnippet(l2_curr_ins, currentOffset, false));
+    if(l2_curr_ins.constructor.TYPE === INSTANCE_TYPE.COMPOSITE) {
+        const line = _b[_b_idx];
+        const idx = line.findIndex(l1_init_ins);
+        const nexttxt = line.getChild(idx + 1);
+        selections.push(getSelectionSnippet(nexttxt, 0, false))
+    }
+}
 
 export function flattenBoundaryToSameEditArea(initElement, currentElement) {
     // 寻找最近的共同父节点

@@ -97,7 +97,6 @@ class t extends Rectangle {
         }
         if(this.hasFooter) {
             if(this.strokeFooter) {
-                console.log('strokeFooter')
                 const switchPath = new Path2D();
                 this._renderPath(switchPath, x, y, xt, yt);
                 ctx.clip(switchPath);

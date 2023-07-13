@@ -50,11 +50,20 @@ class EditArea extends Base {
     getLength() {
         return this._lines.length;
     }
-    splice(start, deleteCount, ...items){
-        return _splice(
+    splice(batchAction, start, deleteCount, ...items){
+        const removed = _splice(
             this._lines, 
             this.documentElement,
             start, deleteCount, ...items);
+        if(batchAction) {
+            batchAction.push({
+                op: 'splice',
+                args: [start, deleteCount, ...items],
+                removed,
+                instance: this,
+            })
+        }
+        return removed;
     }
 
     blur() {

@@ -90,7 +90,7 @@ export default {
                 }
             }
         })
-        console.log(configs)
+        // console.log(configs)
         return {
             configs,
         }
@@ -106,11 +106,8 @@ export default {
             return source.id;
         },
         reOrderAndReflow(ast) {
-            debugger
             const source = make(ast);
-            debugger
             this.configs.layout.reOrder(source);
-            debugger
             this.$refs.jflow.reflow();
         },
     }

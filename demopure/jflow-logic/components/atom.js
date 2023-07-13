@@ -24,7 +24,6 @@ export default {
     render(c, context) {
         const { node } = context.props;
         // const key = context.data.key;
-        console.log(node);
         const targetComponent = getComponent(node?.type, node);
         if (!targetComponent) {
             return null;

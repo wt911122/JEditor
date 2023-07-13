@@ -67,7 +67,7 @@
     width: 1px;
     height: 1px;
     transform-origin: top left;
-    background: rgba(255, 0, 0, 0.37);
+    background: #B4D5FE;
 }
 @keyframes blink {
     0% {opacity: 0}
@@ -138,8 +138,8 @@ je-edit-area {
     min-width: fit-content;
 }
 je-edit-line {
-    min-width: fit-content;
-    /* min-height: 1.25em; */
+    display: block;
+    white-space: nowrap;
 }
 je-edit-area je-edit-area {
     display: inline-block;
@@ -154,10 +154,11 @@ je-edit-area je-edit-area:hover {
 }
 je-text-element {
     /* white-space: pre-wrap; */
+    display: inline-block;
+    vertical-align: middle;
     user-select: none;
     min-width: 0.5em;
     min-height: 1.25em;
-    display: inline-block;
     margin: 0;
     font-family: 'Monaco';
     font-weight: normal;
@@ -167,8 +168,8 @@ je-text-element {
 }
 
 je-composite {
-    display: inline-flex;
-    min-width: fit-content;
+    display: inline-block;
+    vertical-align: middle;
 }
 je-composite.ensuredelete{
     background-color: rgba(255, 0, 0, 0.37);

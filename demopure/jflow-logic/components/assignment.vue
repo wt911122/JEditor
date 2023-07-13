@@ -63,7 +63,6 @@ export default {
         node: Object,
     },
     data() {
-        console.log(this.node)
         return {
             contentConfig: {
                 layout: new LinearLayout({

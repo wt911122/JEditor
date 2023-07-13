@@ -4,7 +4,8 @@ import TextElement from '../instance/text-element';
 import EditLine from '../instance/edit-line';
 import { getFirstTextElementFromInstance, splitTextElementContent } from '../instance/utils';
 import { findParent, getPathOfInstance, queryInstanceByPath, findNextSibling, findFirstCommonParentNode, findPreviousSibling } from '../utils';
-
+import EditArea from '../instance/edit-area';
+/*
 export default class UndoRedo {
     static length = 50;
     _undo = [];
@@ -46,7 +47,7 @@ export default class UndoRedo {
         return x;
     }
 }
-
+*/
 
 export class PlainInput {
     type = OPERRATION.PLAININPUT
@@ -445,4 +446,144 @@ export class SelectionDelete extends DeleteInLine {
     }
 }
 
+
+
+function isSetSourceBatch(x) {
+    return x.length === 1 && x[0].op === 'setSource';
+}
+export default class UndoRedo {
+    static length = 50;
+    _undo = [];
+    _redo = [];
+    _editor = null;
+
+    write(batchAction) {
+        if(batchAction._batch.length === 0) {
+            return;
+        }
+        if(isSetSourceBatch(batchAction._batch)) {
+            const t = batchAction._batch[0];
+            const lastUndo = this.getLastUndo();
+            if(lastUndo && isSetSourceBatch(lastUndo._batch)) {
+                const q = lastUndo._batch[0];
+                if(q.args[0] === t.args[0]) {
+                    q.args[1] = t.args[1];
+                    lastUndo._caretMetaTo = batchAction._caretMetaTo;
+                    return;
+                }
+            }
+        }
+        this._undo.push(batchAction);
+        
+        if(this._undo.length > UndoRedo.length) {
+            this._undo.splice(0, 1);
+        }
+        if(this._redo.length) {
+            this._redo = [];
+        }
+    }
+
+    getLastUndo() {
+        return this._undo[this._undo.length - 1];
+    }
+
+    undo() {
+        const x = this._undo.pop();
+        if(x) {
+            x.undo(this._editor)
+            this._redo.push(x);
+        }
+        return x;
+    }
+
+    redo() {
+        let x = this._redo.pop();
+        while(x && x.SKIP_REDO) {
+            x = this._redo.pop();
+        }
+        if(x) {
+            x.redo(this._editor)
+            this._undo.push(x);
+        }
+        return x;
+    }
+}
+
+
+export class BatchAction {
+    _batch = [];
+    _caretMetaFrom = null;
+    _caretMetaTo = null;
+
+    updateCaretMetaTo(meta) {
+        this._caretMetaTo = meta;
+    }
+
+    push(r) {
+        this._batch.push(r);
+    }
+
+    recordBeforeCaret(caret) {
+        this._caretMetaFrom = caret.saveStatus();
+    }
+
+    recordAfterCaret(caret) {
+        this._caretMetaTo = caret.saveStatus();
+    }
+
+    undo(editor) {
+        this._batch.slice().reverse().forEach(action => {
+            switch(action.op) {
+                case 'range':
+                    const range = editor.range;
+                    range.restoreBoundary(action.args);
+                    editor.resolveRange();
+                    break;
+                case 'setSource':
+                    const [elem, s, ls] = action.args;
+                    elem.setSource(ls)
+                    break;
+                case 'splice':
+                    const instance = action.instance;
+                    const [a, b, ...c] = action.args;
+                    const removed = action.removed;
+                    let i = 0
+                    if(c) {
+                        i = c.length
+                    }
+                    instance.splice(null, a, i, ...removed);
+                    // if(instance instanceof EditArea) {
+                    //     instance.forEach((l) => {
+                    //         const wrapper = l.documentElement;
+                    //         const children = []
+                    //         l.forEach((textElement) => {
+                    //             children.push(textElement.documentElement);
+                    //         })
+                    //         wrapper.replaceChildren(...children)
+                            
+                    //     })
+                    // }
+                    break;
+            }
+        });
+
+        editor.caret.restoreFromStatus(this._caretMetaFrom);
+    }
+
+    redo(editor) {
+        this._batch.forEach(action => {
+            switch(action.op) {
+                case 'setSource':
+                    const [elem, s, ls] = action.args;
+                    elem.setSource(s)
+                    break;
+                case 'splice':
+                    const instance = action.instance;
+                    instance.splice(null, ...action.args);
+                    break;
+            }
+        })
+        editor.caret.restoreFromStatus(this._caretMetaTo);
+    }
+}
 

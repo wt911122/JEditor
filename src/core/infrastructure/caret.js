@@ -1,6 +1,6 @@
 import { JEDITOR_EVENTS, INSTANCE_TYPE } from '../constants';
 import { makeElement } from '../components/dom'; 
-import { findParent, calculateTextWidth } from '../utils';
+import { findParent, calculateTextWidth, queryInstanceByPath, getPathOfInstance } from '../utils';
 
 class Caret {
     static create(editor) {
@@ -133,6 +133,19 @@ class Caret {
         this.documentElement.style.transform = `translate(${tx}px, ${ty}px)`;
         this.documentElement.style.fontSize = fontSize;
         this._animate.refresh();
+    }
+
+    saveStatus() {
+        const path = getPathOfInstance(this.status.textElement);
+        return  {
+            path,
+            offset: this.status.offset,
+        }
+    }
+
+    restoreFromStatus(status) {
+        const instance = queryInstanceByPath(status.path, this._editor.editareaRoot);
+        this.focus(instance, status.offset);
     }
 }
 

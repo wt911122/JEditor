@@ -43,6 +43,7 @@ export const KEYBOARD_COMMANDS = {
     DELTET: 'delete',
     UNDO: 'undo',
     REDO: 'redo',
+    TAB: 'tab',
 }
 
 export const OPERRATION = {

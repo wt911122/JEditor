@@ -57,7 +57,11 @@
 <script>
 import { LinearLayout } from '@joskii/jflow';
 import { CALL_BLOCK_STYLE, ROOT_STYLE } from './style';
+import expressionSlot from './slot/expression-slot.vue';
 export default {
+    components: {
+        'expression-slot': expressionSlot,
+    },
     props: {
         node: Object,
     },

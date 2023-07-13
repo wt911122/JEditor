@@ -14,7 +14,6 @@
             node: Object,
         },
         data() {
-            console.log(this.node.toCode())
             return {
                 selectConfigs: {
                     layout: HORIZONTAL_LAYOUT,

@@ -63,11 +63,21 @@ class EditLine extends Base {
         return this._elements.length;
     }
 
-    splice(start, deleteCount, ...items){
-        return _splice(
+    splice(batchAction, start, deleteCount, ...items){
+        const removed = _splice(
             this._elements, 
             this.documentElement,
             start, deleteCount, ...items);
+
+        if(batchAction) {
+            batchAction.push({
+                op: 'splice',
+                args: [start, deleteCount, ...items],
+                removed,
+                instance: this,
+            })
+        }
+        return removed;
     }
 
     slice(...args) {

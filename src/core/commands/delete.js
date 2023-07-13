@@ -5,44 +5,28 @@ import {
 import { KEYBOARD_COMMANDS, INSTANCE_TYPE, OPERRATION } from "../constants";
 import EditLine from '../instance/edit-line';
 import TextElement from '../instance/text-element';
-import { DeleteInLine, DeleteInEditarea, SelectionDelete } from '../infrastructure/undoredo';
+import { DeleteInLine, DeleteInEditarea, BatchAction } from '../infrastructure/undoredo';
 
 export class DeleteCommand extends Command {
     static name = KEYBOARD_COMMANDS.DELTET;
     
     deleteSelection() {
-        const range = this._editor.range;
+        const editor = this._editor;
+        const range = editor.range;
+        const undoredo = editor.undoredo;
         const selections = range.getSelections();
-        const caret = this._editor.caret;
+        const caret = editor.caret;
+        
         if(selections.length > 0) {
-            const [element, offset] = range._delete();
+            const batch = new BatchAction();
+            batch.recordBeforeCaret(caret);
+            const [element, offset] = range._delete(batch);
             caret.focus(element, offset);
             range.clear();
+            batch.recordAfterCaret(caret);
+            undoredo.write(batch);
             return true;
         }
-    }
-
-    undoredoInline(item, editline, textElementTo, nextOffset, textElementFrom, offsetfrom) {
-        const undoredo = this._editor.undoredo;
-        let last = undoredo.getLastUndo();
-        
-        if(!last || ![OPERRATION.DELETE_IN_LINE, OPERRATION.SELECTION_DELETE].includes(last.type)
-            || !last.isSame(editline, textElementFrom, offsetfrom, this._editor)) {
-            last = new DeleteInLine({
-                editline,
-                textElement: textElementFrom,
-                offset: offsetfrom,
-            })
-            // last.setFromPosition(editline.findIndex(textElementFrom), offsetfrom);
-            undoredo.write(last);
-        }
-        last.append(item);
-        last.setToPosition(textElementTo, nextOffset);
-        // last.setToPosition(editline.findIndex(textElementTo), nextOffset);
-    }
-
-    undoredoInEditArea() {
-
     }
 
     exec() {
@@ -50,43 +34,53 @@ export class DeleteCommand extends Command {
             return;
         }
 
-        const caret = this._editor.caret;
+        const editor = this._editor;
+        const caret = editor.caret;
+        const undoredo = editor.undoredo;
         const {
             textElement,
             offset,
-            _ensureDeleteComposite,
+            // _ensureDeleteComposite,
         } = caret.status;
-        if(_ensureDeleteComposite) {
-            const line = findParent(_ensureDeleteComposite, INSTANCE_TYPE.LINE);
-            const element_idx = line.findIndex(_ensureDeleteComposite);
-            const preElement = line.getChild(element_idx-1);
-            const afterElement = line.getChild(element_idx+1);
-            if(preElement instanceof TextElement && afterElement instanceof TextElement) {
-                // 默认 composite 两侧均为 textElement
-                const offset = preElement.source.length;
+        // if(_ensureDeleteComposite) {
+        //     const line = findParent(_ensureDeleteComposite, INSTANCE_TYPE.LINE);
+        //     const element_idx = line.findIndex(_ensureDeleteComposite);
+        //     const preElement = line.getChild(element_idx-1);
+        //     const afterElement = line.getChild(element_idx+1);
+        //     if(preElement instanceof TextElement && afterElement instanceof TextElement) {
+        //         // 默认 composite 两侧均为 textElement
+        //         const offset = preElement.source.length;
                 
 
-                this.undoredoInline(_ensureDeleteComposite, line, 
-                    preElement, offset,
-                    afterElement, 0);
-                preElement.setSource(preElement.source + afterElement.source);
-                line.splice(element_idx, 2);
-                caret.focus(preElement, offset);
-            } 
-            return;
-        }
+        //         this.undoredoInline(_ensureDeleteComposite, line, 
+        //             preElement, offset,
+        //             afterElement, 0);
+        //         preElement.setSource(preElement.source + afterElement.source);
+        //         line.splice(element_idx, 2);
+        //         caret.focus(preElement, offset);
+        //     } 
+        //     return;
+        // }
+
+        const batch = new BatchAction();
+        batch.recordBeforeCaret(caret);
         const line = findParent(textElement, INSTANCE_TYPE.LINE);
         const content = textElement.source;
         const preContent = content.substring(0, offset);
         const afterContent = content.substring(offset);
         if(offset > 0) {
-            textElement.setSource(preContent.substring(0, preContent.length-1) + afterContent);
+            textElement.setSource(
+                preContent.substring(0, preContent.length-1) + afterContent, 
+                batch);
             const nextOffset = offset - 1;
             // undoredo
-            this.undoredoInline(preContent[preContent.length-1], line, 
-                textElement, nextOffset,
-                textElement, offset);
+            // this.undoredoInline( batch,
+            //     preContent[preContent.length-1], line, 
+            //     textElement, nextOffset,
+            //     textElement, offset);
             caret.focus(textElement, nextOffset);
+            batch.recordAfterCaret(caret);
+            undoredo.write(batch);
             return;
         }
 
@@ -99,12 +93,14 @@ export class DeleteCommand extends Command {
             // if(prepreElement && prepreElement instanceof TextElement) {
                 const preoffset = prepreElement.source.length;
                 
-                this.undoredoInline(preElement, line, 
-                    prepreElement, preoffset,
-                    textElement, 0);
-                prepreElement.setSource(prepreElement.source + afterContent)
-                line.splice(startNumber, 2);
+                // this.undoredoInline(preElement, line, 
+                //     prepreElement, preoffset,
+                //     textElement, 0);
+                prepreElement.setSource(prepreElement.source + afterContent, batch)
+                line.splice(batch, startNumber, 2);
                 caret.focus(prepreElement, preoffset);
+                batch.recordAfterCaret(caret);
+                undoredo.write(batch);
             // } else {
             //     line.splice(startNumber, 1);
             //     caret.focus(textElement, 0);
@@ -121,29 +117,31 @@ export class DeleteCommand extends Command {
             if(!lastElement instanceof TextElement) {
                 throw 'line not end with textelement!'
             }
-            editarea.splice(line_idx, 1);
+            editarea.splice(batch, line_idx, 1);
             const afterElements = line.slice(1);
             const l = lastElement.source.length;
             if(afterContent) {
-                lastElement.setSource(lastElement.source + afterContent);
+                lastElement.setSource(lastElement.source + afterContent, );
             }
             if(afterElements.length > 0) {
-                preLine.splice(preLine.getLength(), 0, ...afterElements);
+                preLine.splice(batch, preLine.getLength(), 0, ...afterElements);
             }
             
-            const undoredo = this._editor.undoredo;
-            undoredo.write(new DeleteInEditarea({
-                textElement: lastElement,
-                offset: l,
-            }));
+            // const undoredo = this._editor.undoredo;
+            // undoredo.write(new DeleteInEditarea({
+            //     textElement: lastElement,
+            //     offset: l,
+            // }));
 
             caret.focus(lastElement, l);
+            batch.recordAfterCaret(caret);
+            undoredo.write(batch);
             return;
         }
 
-        const composite = findParent(editarea, INSTANCE_TYPE.COMPOSITE);
-        if(composite) {
-            caret.setEnsureDeleteComposite(composite);
-        }
+        // const composite = findParent(editarea, INSTANCE_TYPE.COMPOSITE);
+        // if(composite) {
+        //     caret.setEnsureDeleteComposite(composite);
+        // }
     }
 }

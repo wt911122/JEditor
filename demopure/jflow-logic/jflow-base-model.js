@@ -256,7 +256,7 @@ class IfStatement extends BaseNode {
         this.alternate.forEach(n => {
             n.traverse(callback);
         });
-        console.log(this.Endpoint)
+        // console.log(this.Endpoint)
         callback(this.Endpoint);
     }
 

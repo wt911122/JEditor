@@ -330,3 +330,30 @@ export class ArrowDownCommand extends Command {
         }
     }
 }
+
+export class TabCommand extends Command {
+    static name = KEYBOARD_COMMANDS.TAB;
+    
+    exec() {
+        const {
+            textElement,
+        } = caret.status;
+        const composite = findParent(textElement, INSTANCE_TYPE.COMPOSITE);
+        if(composite) {
+            const areas = composite.getChildren().slice().sort((_a, _b) => {
+                const a = _a.documentElement.getBoundingClientRect();
+                const b = _b.documentElement.getBoundingClientRect();
+                if (a.top === b.top) {
+                  return a.left - b.left;
+                } else {
+                  return a.top - b.top;
+                }
+            });
+            const idx = areas.findIndex(ar => ar === editarea);
+            const nextEditArea = areas[idx+1];
+            if(nextEditArea) {
+                
+            }
+        }
+    }
+}

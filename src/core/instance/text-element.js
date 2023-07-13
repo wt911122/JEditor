@@ -19,11 +19,18 @@ class TextElement extends Base {
     source = ''
 
 
-    setSource(content) {
+    setSource(content, records) {
         const editor = this._editor;
         const tokens = editor.lang.tokenize(content);
+        const lastSource = this.source;
         this.source = content;
         this.documentElement.innerHTML = tokenToHTML(tokens).join('');
+        if(records) {
+            records.push({
+                op: 'setSource',
+                args: [this, content, lastSource],
+            })
+        }
     }
 
     getLength() {

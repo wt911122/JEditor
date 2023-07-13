@@ -1,10 +1,10 @@
 import { KEYBOARD_INPUT, OPERRATION } from '../constants';
-import { PlainInput, SpaceInput } from '../infrastructure/undoredo';
-
+// import { PlainInput, SpaceInput } from '../infrastructure/undoredo';
+import { BatchAction } from '../infrastructure/undoredo'
 export default class Input {
     composite_cache = null;
     _editor = null;
-
+/*
     undoredo(content, textElement, offset) {
         const isSpace = /^\s+$/.test(content);
         const undoredo = this._editor.undoredo;
@@ -31,7 +31,7 @@ export default class Input {
             }
         }
     }
-
+*/
     handle(kind, data){
         const caret = this._editor.caret;
         const {
@@ -39,6 +39,8 @@ export default class Input {
             offset
         } = caret.status;
         const content = textElement.source;
+        const batch = new BatchAction();
+        batch.recordBeforeCaret(caret);
         let preContent = content.substring(0, offset);
         let afterContent 
         if(this.composite_cache) {
@@ -50,9 +52,9 @@ export default class Input {
         switch(kind) {
             case KEYBOARD_INPUT.INPUT:
                 preContent += data;
-                textElement.setSource(preContent + afterContent);
+                textElement.setSource(preContent + afterContent, batch);
                 caret.forward(data.length);
-                this.undoredo(data, textElement, offset);
+                // this.undoredo(data, textElement, offset);
                 break;
             case KEYBOARD_INPUT.COMPOSITION_START:
                 this.composite_cache = [preContent.length, preContent.length];
@@ -66,11 +68,14 @@ export default class Input {
                 break;
             case KEYBOARD_INPUT.COMPOSITION_END:
                 preContent = preContent.substring(0, this.composite_cache[0]);
-                textElement.setSource(preContent + data + afterContent);
+                textElement.setSource(preContent + data + afterContent, batch);
                 caret.setOffset(this.composite_cache[0] + data.length);
                 this.composite_cache = null;
-                this.undoredo(data, textElement, offset);
+                // this.undoredo(data, textElement, offset);
                 break;
         }
+        batch.recordAfterCaret(caret);
+
+        this._editor.undoredo.write(batch);
     }
 }
